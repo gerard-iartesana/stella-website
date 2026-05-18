@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academy | Roots by Stella</title>
+    <meta name="description" content="Aprende el arte del trenzado afro con técnicas profesionales. Cursos presenciales en Menorca.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Noto+Serif:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header & Navigation -->
+    <header class="header header-traditional" id="header">
+        <div class="container header-container">
+            <a href="index.html" class="logo-small">
+                <img src="./imagenes/Stella logo dorado transparente-05.png" alt="Roots by Stella Logo">
+            </a>
+            
+            <button class="hamburger" id="hamburger" aria-label="Abrir menú">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+            
+            <nav class="nav-menu" id="nav-menu">
+                <div class="nav-socials">
+                    <a href="#">f</a>
+                    <a href="#">X</a>
+                    <a href="#">ig</a>
+                </div>
+                <ul class="nav-list">
+                    <li><a href="servicios.html" class="nav-link">Servicios</a></li>
+                    <li><a href="lookbook.html" class="nav-link">Lookbook</a></li>
+                    <li><a href="academy.html" class="nav-link">Academy</a></li>
+                    <li><a href="filosofia.html" class="nav-link">Filosofía</a></li>
+                    <li><a href="#" target="_blank" class="nav-link">Tienda</a></li>
+                    <li><a href="contacto.html" class="nav-link">Contacto</a></li>
+                    <li><a href="contacto.html" class="btn btn-primary btn-nav-desktop">Reservar Cita</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <!-- Page Hero -->
+        <section class="page-hero text-center">
+            <div class="hero-bg" style="background-image: linear-gradient(rgba(10, 10, 10, 0.6), rgba(10, 10, 10, 0.8)), url('./imagenes/Container-3.png'); background-position: center; background-size: cover; background-repeat: no-repeat;"></div>
+            <div class="container hero-container">
+                <div class="page-hero-content">
+                    <div class="gold-line center"></div>
+                    <h1 class="page-hero-title">Academia Roots by Stella</h1>
+                    <p class="page-hero-subtitle mx-auto">
+                        Aprende el arte del trenzado afro con técnicas profesionales
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Academy Main Section -->
+        <section class="academy-section text-center">
+            <div class="container">
+                <div class="academy-header">
+                    <h2 class="academy-title">
+                        <svg class="academy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        Cursos Presenciales en Menorca
+                    </h2>
+                    <p class="academy-subtitle mx-auto">
+                        Arte ancestral africano que protege y embellece tu cabello. Cada trenza es una expresión de maestría artesanal que combina tradición y estilo contemporáneo.
+                    </p>
+                </div>
+
+                <div class="info-form-box text-left">
+                    <div class="academy-info">
+                        <h3 class="info-title">¿Por qué asistir a nuestros cursos?</h3>
+                        <ul class="academy-features">
+                            <li>
+                                <span class="gold-check">✓</span>
+                                Aprendizaje práctico con supervisión directa
+                            </li>
+                            <li>
+                                <span class="gold-check">✓</span>
+                                Grupos reducidos para atención personalizada
+                            </li>
+                            <li>
+                                <span class="gold-check">✓</span>
+                                Certificado de finalización
+                            </li>
+                            <li>
+                                <span class="gold-check">✓</span>
+                                Material didáctico incluido
+                            </li>
+                        </ul>
+                    </div>
+
+                    <form class="academy-form" id="academy-form">
+                        <div class="form-row">
+                            <input type="text" placeholder="Nombre" required class="form-input">
+                            <input type="email" placeholder="Dirección de correo electrónico" required class="form-input">
+                        </div>
+                        <div class="form-row">
+                            <input type="tel" placeholder="Teléfono" required class="form-input">
+                        </div>
+                        <div class="form-row">
+                            <textarea placeholder="¿Qué te gustaría aprender?" rows="4" required class="form-input"></textarea>
+                        </div>
+                        
+                        <div class="form-submit-row">
+                            <div class="captcha-box">
+                                <span>10 + 1 = </span>
+                                <input type="number" id="captcha-answer" required class="captcha-input">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Enviar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-container">
+            <div class="footer-col brand-col">
+                <h3 class="footer-brand">Roots by Stella</h3>
+                <p class="footer-desc">El primer salón especializado en trenzado africano y soluciones de alopecia en Menorca. Cuidamos tu esencia.</p>
+            </div>
+            
+            <div class="footer-col nav-col">
+                <h4 class="footer-heading">Navegación</h4>
+                <ul class="footer-links">
+                    <li><a href="servicios.html">Servicios</a></li>
+                    <li><a href="lookbook.html">Lookbook</a></li>
+                    <li><a href="academy.html">Academy</a></li>
+                    <li><a href="index.html#cuidado-experto">Filosofía</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-col contact-col">
+                <h4 class="footer-heading">Contacto</h4>
+                <ul class="footer-contact-list">
+                    <li>
+                        <span class="icon">📍</span>
+                        <p>Carrer de Maria Lluïsa Serra, 56<br>07703 Maó, Illes Balears</p>
+                    </li>
+                    <li>
+                        <span class="icon">📞</span>
+                        <p><a href="tel:+34664101059">664 10 10 59</a></p>
+                    </li>
+                    <li>
+                        <span class="icon">✉️</span>
+                        <p><a href="mailto:hola@rootsbystella.com">hola@rootsbystella.com</a></p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <div class="container">
+                <p>&copy; 2025 Roots by Stella. Todos los derechos reservados. Diseñado por iARTESANA.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JS -->
+    <script src="script.js"></script>
+</body>
+</html>

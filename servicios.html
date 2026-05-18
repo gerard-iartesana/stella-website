@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servicios | Roots by Stella</title>
+    <meta name="description" content="Conoce nuestros servicios especializados: Trenzado africano, Pelucas Oncológicas, Sistemas Capilares y Peinados para Eventos en Menorca.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Noto+Serif:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header & Navigation -->
+    <header class="header header-traditional" id="header">
+        <div class="container header-container">
+            <a href="index.html" class="logo-small">
+                <img src="./imagenes/Stella logo dorado transparente-05.png" alt="Roots by Stella Logo">
+            </a>
+            
+            <button class="hamburger" id="hamburger" aria-label="Abrir menú">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+            
+            <nav class="nav-menu" id="nav-menu">
+                <div class="nav-socials">
+                    <a href="#">f</a>
+                    <a href="#">X</a>
+                    <a href="#">ig</a>
+                </div>
+                <ul class="nav-list">
+                    <li><a href="servicios.html" class="nav-link">Servicios</a></li>
+                    <li><a href="lookbook.html" class="nav-link">Lookbook</a></li>
+                    <li><a href="academy.html" class="nav-link">Academy</a></li>
+                    <li><a href="filosofia.html" class="nav-link">Filosofía</a></li>
+                    <li><a href="#" target="_blank" class="nav-link">Tienda</a></li>
+                    <li><a href="contacto.html" class="nav-link">Contacto</a></li>
+                    <li><a href="contacto.html" class="btn btn-primary btn-nav-desktop">Reservar Cita</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <!-- Page Hero -->
+        <section class="page-hero text-center">
+            <div class="hero-bg" style="background-image: url('./imagenes/Image (Background).png'); background-position: top center; background-size: cover; background-repeat: no-repeat;"></div>
+            <div class="container hero-container">
+                <div class="page-hero-content">
+                    <div class="gold-line center"></div>
+                    <h1 class="page-hero-title">Trenza tu libertad</h1>
+                    <p class="page-hero-subtitle mx-auto">
+                        soluciones capilares hechas a mano, con el cuidado que tu cabello merece
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Services List Section -->
+        <section class="service-list-section">
+            <div class="container" id="servicios-container">
+                <!-- Los servicios se inyectarán dinámicamente desde data.json -->
+                <div class="text-center" style="padding: 3rem;">
+                    <p>Cargando servicios...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="cta-section text-center">
+            <div class="container">
+                <h2 class="section-title">¿No estás seguro de qué servicio necesitas?</h2>
+                <p class="section-subtitle mx-auto">Reserva una consulta gratuita y encontraremos juntos la mejor solución para ti</p>
+                <a href="index.html#contacto" class="btn btn-primary">Reservar Consulta Gratuita</a>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-container">
+            <div class="footer-col brand-col">
+                <h3 class="footer-brand">Roots by Stella</h3>
+                <p class="footer-desc">El primer salón especializado en trenzado africano y soluciones de alopecia en Menorca. Cuidamos tu esencia.</p>
+            </div>
+            
+            <div class="footer-col nav-col">
+                <h4 class="footer-heading">Navegación</h4>
+                <ul class="footer-links">
+                    <li><a href="servicios.html">Servicios</a></li>
+                    <li><a href="#">Lookbook</a></li>
+                    <li><a href="#">Academy</a></li>
+                    <li><a href="index.html#cuidado-experto">Filosofía</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-col contact-col">
+                <h4 class="footer-heading">Contacto</h4>
+                <ul class="footer-contact-list">
+                    <li>
+                        <span class="icon">📍</span>
+                        <p>Carrer de Maria Lluïsa Serra, 56<br>07703 Maó, Illes Balears</p>
+                    </li>
+                    <li>
+                        <span class="icon">📞</span>
+                        <p><a href="tel:+34664101059">664 10 10 59</a></p>
+                    </li>
+                    <li>
+                        <span class="icon">✉️</span>
+                        <p><a href="mailto:hola@rootsbystella.com">hola@rootsbystella.com</a></p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <div class="container">
+                <p>&copy; 2025 Roots by Stella. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JS -->
+    <script src="script.js"></script>
+</body>
+</html>

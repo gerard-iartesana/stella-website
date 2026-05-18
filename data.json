@@ -1,0 +1,168 @@
+{
+  "servicios": [
+    {
+      "id": "trenzado",
+      "titulo": "Trenzado",
+      "descripcion": "Arte ancestral africano que protege y embellece tu cabello. Cada trenza es una expresión de maestría artesanal que combina tradición y estilo contemporáneo.",
+      "imagenes": [
+        "./imagenes/Trenzas-3.jpg",
+        "./imagenes/Trenzas-2.jpg",
+        "./imagenes/Trenzas-7.jpg"
+      ],
+      "incluye": [
+        "Box Braids (trenzas individuales)",
+        "Cornrows (trenzas pegadas al cuero cabelludo)",
+        "Rastas y mantenimiento de dreadlocks",
+        "Estilos personalizados según preferencias"
+      ],
+      "duracion": "2-6 horas según estilo",
+      "precio": "Desde 50€"
+    },
+    {
+      "id": "pelucas-oncologicas",
+      "titulo": "Pelucas Oncológicas",
+      "descripcion": "Adaptaciones naturales diseñadas con sensibilidad y experiencia para quienes atraviesan un tratamiento oncológico. Tu bienestar y confianza son nuestra prioridad.",
+      "imagenes": [
+        "./imagenes/pelucas-1.png",
+        "./imagenes/pelucas-2.png",
+        "./imagenes/pelucas-3.png"
+      ],
+      "incluye": [
+        "Consulta privada y confidencial",
+        "Pelucas de aspecto natural y cómodo",
+        "Ajustes personalizados a tu medida",
+        "Acompañamiento con empatía durante todo el proceso"
+      ],
+      "duracion": "90-120 min.",
+      "precio": "Desde 70€"
+    },
+    {
+      "id": "sistema-capilar",
+      "titulo": "Sistema Capilar para Hombres",
+      "descripcion": "Soluciones discretas y personalizadas para recuperar la confianza. Sistemas capilares de máxima calidad que se adaptan perfectamente a tu estilo de vida.",
+      "imagenes": [
+        "./imagenes/capilar-1.png",
+        "./imagenes/capilar-2.png",
+        "./imagenes/capilar-3.png"
+      ],
+      "incluye": [
+        "Sistemas capilares de aspecto completamente natural",
+        "Ajuste personalizado según forma del cráneo",
+        "Mantenimiento y seguimiento continuo",
+        "Asesoramiento privado y confidencial"
+      ],
+      "duracion": "120-150 min.",
+      "precio": "Desde 80€"
+    },
+    {
+      "id": "peinados-eventos",
+      "titulo": "Peinados para Eventos",
+      "descripcion": "Estilismo profesional para tus momentos especiales. Diseños elegantes que realzan tu belleza natural y te hacen brillar en cada ocasión.",
+      "imagenes": [
+        "./imagenes/eventos-1.png",
+        "./imagenes/eventos-2.png",
+        "./imagenes/eventos-3.png"
+      ],
+      "incluye": [
+        "Recogidos elegantes y sofisticados",
+        "Peinados con trenzas decorativas",
+        "Estilos adaptados al tipo de evento",
+        "Acabado duradero para toda la celebración"
+      ],
+      "duracion": "90-120 min.",
+      "precio": "Desde 40€"
+    }
+  ],
+  "lookbook": [
+    {
+      "id": "item1",
+      "categoria": "trenzas",
+      "imagen": "./imagenes/Trenzas-2.jpg",
+      "alt": "Trenzas africanas"
+    },
+    {
+      "id": "item2",
+      "categoria": "pelucas",
+      "imagen": "./imagenes/pelucas-1.png",
+      "alt": "Peluca oncológica premium"
+    },
+    {
+      "id": "item3",
+      "categoria": "especiales",
+      "imagen": "./imagenes/eventos-1.png",
+      "alt": "Peinado elegante evento"
+    },
+    {
+      "id": "item4",
+      "categoria": "protesis",
+      "imagen": "./imagenes/capilar-1.png",
+      "alt": "Sistema capilar hombres"
+    },
+    {
+      "id": "item5",
+      "categoria": "trenzas",
+      "imagen": "./imagenes/Trenzas azules 3.jpg",
+      "alt": "Trenzas azules"
+    },
+    {
+      "id": "item6",
+      "categoria": "protesis",
+      "imagen": "./imagenes/capilar-2.png",
+      "alt": "Sistema capilar hombre 2"
+    },
+    {
+      "id": "item7",
+      "categoria": "pelucas",
+      "imagen": "./imagenes/pelucas-2.png",
+      "alt": "Peluca oncológica premium"
+    },
+    {
+      "id": "item8",
+      "categoria": "trenzas",
+      "imagen": "./imagenes/Trenzas-3.jpg",
+      "alt": "Trenzas africanas 3"
+    },
+    {
+      "id": "item9",
+      "categoria": "especiales",
+      "imagen": "./imagenes/eventos-2.png",
+      "alt": "Peinado boda trenzas"
+    },
+    {
+      "id": "item10",
+      "categoria": "trenzas",
+      "imagen": "./imagenes/Trenzas-7.jpg",
+      "alt": "Trenzas africanas detalle"
+    },
+    {
+      "id": "item11",
+      "categoria": "protesis",
+      "imagen": "./imagenes/capilar-3.png",
+      "alt": "Sistema capilar hombre 3"
+    },
+    {
+      "id": "item12",
+      "categoria": "pelucas",
+      "imagen": "./imagenes/pelucas-3.png",
+      "alt": "Peluca oncológica"
+    },
+    {
+      "id": "item13",
+      "categoria": "especiales",
+      "imagen": "./imagenes/eventos-3.png",
+      "alt": "Peinado evento gala"
+    },
+    {
+      "id": "item14",
+      "categoria": "trenzas",
+      "imagen": "./imagenes/Presentacion.jpg",
+      "alt": "Trenzas presentacion"
+    },
+    {
+      "id": "item15",
+      "categoria": "trenzas",
+      "imagen": "./imagenes/Servicio 2.png",
+      "alt": "Servicio de trenzas"
+    }
+  ]
+}

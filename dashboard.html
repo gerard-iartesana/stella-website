@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Roots by Stella</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Noto+Serif:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Roots CMS</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-btn active" data-view="servicios">Servicios</button>
+                <button class="nav-btn" data-view="lookbook">Lookbook</button>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="save-all-btn" class="btn btn-primary btn-full">Guardar Cambios</button>
+                <div id="save-status" class="status-msg"></div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            
+            <!-- Vista Servicios -->
+            <section id="view-servicios" class="view-section active">
+                <div class="section-header">
+                    <h2>Gestión de Servicios</h2>
+                    <button class="btn btn-secondary" id="add-servicio-btn">+ Añadir Servicio</button>
+                </div>
+                
+                <div id="servicios-list" class="items-list">
+                    <!-- Servicios inyectados por JS -->
+                </div>
+            </section>
+
+            <!-- Vista Lookbook -->
+            <section id="view-lookbook" class="view-section">
+                <div class="section-header">
+                    <h2>Gestión de Lookbook</h2>
+                    <button class="btn btn-secondary" id="add-lookbook-btn">+ Añadir Imagen</button>
+                </div>
+                
+                <div id="lookbook-list" class="items-list grid-list">
+                    <!-- Items de lookbook inyectados por JS -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="modal-overlay" class="modal-overlay">
+        <div class="modal" id="servicio-modal">
+            <div class="modal-header">
+                <h3 id="servicio-modal-title">Editar Servicio</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="servicio-form">
+                    <input type="hidden" id="servicio-id">
+                    <div class="form-group">
+                        <label>Título</label>
+                        <input type="text" id="servicio-titulo" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Descripción</label>
+                        <textarea id="servicio-descripcion" rows="3" required></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Duración</label>
+                            <input type="text" id="servicio-duracion">
+                        </div>
+                        <div class="form-group">
+                            <label>Precio</label>
+                            <input type="text" id="servicio-precio">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Imágenes (URLs separadas por coma)</label>
+                        <input type="text" id="servicio-imagenes" placeholder="./imagenes/img1.jpg, ./imagenes/img2.jpg">
+                    </div>
+                    <div class="form-group">
+                        <label>Qué incluye (Items separados por línea)</label>
+                        <textarea id="servicio-incluye" rows="4"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="modal" id="lookbook-modal">
+            <div class="modal-header">
+                <h3 id="lookbook-modal-title">Añadir/Editar Imagen</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="lookbook-form">
+                    <input type="hidden" id="lookbook-id">
+                    <div class="form-group">
+                        <label>URL de la Imagen</label>
+                        <input type="text" id="lookbook-imagen" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Categoría</label>
+                        <select id="lookbook-categoria">
+                            <option value="trenzas">Trenzas</option>
+                            <option value="pelucas">Pelucas</option>
+                            <option value="protesis">Prótesis</option>
+                            <option value="especiales">Especiales</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Texto Alternativo (Alt)</label>
+                        <input type="text" id="lookbook-alt">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Confirm Modal -->
+    <div id="confirm-overlay" class="modal-overlay">
+        <div class="modal" id="confirm-modal" style="max-width: 420px; display: block;">
+            <div class="modal-header">
+                <h3 style="color: #dc3545;">⚠️ Confirmar Eliminación</h3>
+                <button class="close-modal" id="confirm-cancel-x">&times;</button>
+            </div>
+            <div class="modal-body" style="text-align: center;">
+                <p id="confirm-message" style="margin-bottom: 1.5rem; color: #A0A0A0;">¿Estás seguro?</p>
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                    <button id="confirm-cancel-btn" class="btn btn-secondary" style="flex: 1;">Cancelar</button>
+                    <button id="confirm-ok-btn" class="btn btn-danger" style="flex: 1; background-color: #dc3545; color: white; border: none;">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="dashboard-v3.js"></script>
+</body>
+</html>
