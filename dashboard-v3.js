@@ -33,6 +33,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const confirmCancelBtn = document.getElementById('confirm-cancel-btn');
     const confirmCancelX = document.getElementById('confirm-cancel-x');
 
+    // --- API URL ---
+    const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+        ? 'http://localhost:3000/api/data' 
+        : '/api/data';
+
     // --- Init ---
     fetchData();
 
@@ -82,9 +87,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- API Calls ---
-    const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-        ? 'http://localhost:3000/api/data' 
-        : '/api/data';
 
     async function fetchData() {
         try {
