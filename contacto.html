@@ -41,7 +41,7 @@
                     <li><a href="filosofia.html" class="nav-link">Filosofía</a></li>
                     <li><a href="#" target="_blank" class="nav-link">Tienda</a></li>
                     <li><a href="contacto.html" class="nav-link active">Contacto</a></li>
-                    <li><a href="contacto.html" class="btn btn-primary btn-nav-desktop">Reservar Cita</a></li>
+                    <li><a href="#" class="btn btn-primary btn-nav-desktop btn-open-booking">Reservar Cita</a></li>
                 </ul>
             </nav>
         </div>
@@ -224,9 +224,91 @@
         </div>
     </footer>
 
+    <!-- Booking Modal -->
+    <div id="booking-modal-overlay" class="booking-overlay">
+        <div class="booking-modal" id="booking-modal-content">
+            <div class="booking-header">
+                <h3>Reservar Cita</h3>
+                <button class="booking-close" id="close-booking-modal">&times;</button>
+            </div>
+
+            <!-- Progress -->
+            <div class="booking-progress">
+                <div class="booking-progress-step active" data-step="1">
+                    <span class="step-num">1</span>
+                    <span class="step-label">Servicio</span>
+                </div>
+                <div class="booking-progress-line"></div>
+                <div class="booking-progress-step" data-step="2">
+                    <span class="step-num">2</span>
+                    <span class="step-label">Día</span>
+                </div>
+                <div class="booking-progress-line"></div>
+                <div class="booking-progress-step" data-step="3">
+                    <span class="step-num">3</span>
+                    <span class="step-label">Hora</span>
+                </div>
+            </div>
+
+            <!-- Step 1: Service -->
+            <div class="booking-step active" id="booking-step-1">
+                <h4 class="booking-step-title">¿Qué servicio necesitas?</h4>
+                <div class="booking-services-list" id="booking-services-list">
+                    <p style="text-align:center;color:#999;padding:2rem;">Cargando servicios...</p>
+                </div>
+            </div>
+
+            <!-- Step 2: Calendar -->
+            <div class="booking-step" id="booking-step-2">
+                <button class="booking-back-btn" id="booking-back-to-services">← Cambiar servicio</button>
+                <h4 class="booking-step-title">Selecciona un día — <span id="booking-selected-service"></span></h4>
+                <div class="booking-cal-nav">
+                    <button id="booking-cal-prev">← Anterior</button>
+                    <h4 id="booking-cal-title"></h4>
+                    <button id="booking-cal-next">Siguiente →</button>
+                </div>
+                <div class="booking-calendar-grid" id="booking-calendar-grid"></div>
+            </div>
+
+            <!-- Step 3: Time + Form -->
+            <div class="booking-step" id="booking-step-3">
+                <button class="booking-back-btn" id="booking-back-to-calendar">← Cambiar día</button>
+                <h4 class="booking-step-title">Elige tu hora — <span id="booking-selected-date"></span></h4>
+                <div class="booking-slots-grid" id="booking-slots-grid"></div>
+
+                <div class="booking-form-section" id="booking-form-section">
+                    <div class="booking-summary" id="booking-summary"></div>
+                    <form id="booking-client-form">
+                        <div class="booking-form-group">
+                            <label>Nombre *</label>
+                            <input type="text" id="booking-nombre" required placeholder="Tu nombre completo">
+                        </div>
+                        <div class="booking-form-row">
+                            <div class="booking-form-group">
+                                <label>Email</label>
+                                <input type="email" id="booking-email" placeholder="tu@email.com">
+                            </div>
+                            <div class="booking-form-group">
+                                <label>Teléfono</label>
+                                <input type="tel" id="booking-telefono" placeholder="612 345 678">
+                            </div>
+                        </div>
+                        <div class="booking-form-group">
+                            <label>Notas (opcional)</label>
+                            <textarea id="booking-notas" rows="2" placeholder="¿Algo que debamos saber?"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="booking-submit-btn" style="width:100%;">Confirmar Reserva</button>
+                        <div id="booking-status"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase.js"></script>
+    <script src="booking.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

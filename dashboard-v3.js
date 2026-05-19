@@ -240,6 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('servicio-descripcion').value = s.descripcion;
         document.getElementById('servicio-duracion').value = s.duracion;
         document.getElementById('servicio-precio').value = s.precio;
+        document.getElementById('servicio-duracion-minutos').value = s.duracion_minutos || '';
         document.getElementById('servicio-imagenes').value = s.imagenes.join(', ');
         document.getElementById('servicio-incluye').value = s.incluye.join('\n');
         if (typeof UploadModule !== 'undefined') UploadModule.setUrls('servicio-upload-zone', 'servicio-previews', s.imagenes || []);
@@ -256,6 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
             descripcion: document.getElementById('servicio-descripcion').value,
             duracion: document.getElementById('servicio-duracion').value,
             precio: document.getElementById('servicio-precio').value,
+            duracion_minutos: parseInt(document.getElementById('servicio-duracion-minutos').value) || null,
             imagenes: (typeof UploadModule !== 'undefined' && UploadModule.getUrls('servicio-upload-zone').length > 0)
                 ? UploadModule.getUrls('servicio-upload-zone')
                 : document.getElementById('servicio-imagenes').value.split(',').map(s => s.trim()).filter(s => s),
