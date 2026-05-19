@@ -69,12 +69,14 @@ const BookingModule = {
         const form = document.getElementById('booking-client-form');
         if (form) form.addEventListener('submit', (e) => { e.preventDefault(); this.submit(); });
 
-        // All "Reservar Cita" buttons on the page
-        document.querySelectorAll('.btn-open-booking').forEach(btn => {
-            btn.addEventListener('click', (e) => {
+        // All "Reservar Cita" buttons on the page (delegated for dynamic buttons)
+        document.body.addEventListener('click', (e) => {
+            const btn = e.target.closest('.btn-open-booking');
+            if (btn) {
                 e.preventDefault();
-                this.open();
-            });
+                const serviceId = btn.dataset.servicioId;
+                this.open(serviceId);
+            }
         });
     },
 

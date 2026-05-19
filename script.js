@@ -344,7 +344,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p><strong>Duración:</strong> <span class="meta-value">${servicio.duracion}</span></p>
                         <p><strong>Precio:</strong> <span class="meta-value">${servicio.precio}</span></p>
                     </div>
-                    <a href="index.html#contacto" class="btn btn-primary mt-3">Reservar este Servicio</a>
+                    <a href="contacto.html#reservar" class="btn btn-primary mt-3 btn-open-booking" data-servicio-id="${servicio.id}">Reservar este Servicio</a>
                 </div>
             `;
             serviciosContainer.appendChild(row);

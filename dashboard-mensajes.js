@@ -78,7 +78,7 @@ const MensajesModule = {
                     <div class="msg-header-row"><span class="msg-nombre">${m.nombre}</span><span class="msg-fecha">${fecha}</span></div>
                     <div class="msg-asunto">${m.asunto || 'Sin asunto'}</div>
                     <div class="msg-preview">${m.mensaje.substring(0, 80)}...</div>
-                    <div class="msg-tags">${m.respondido ? '<span class="msg-tag respondido">Respondido</span>' : '<span class="msg-tag pendiente">Pendiente</span>'}</div>
+                    <div class="msg-tags">${m.respondido ? '<span class="msg-tag respondido">Respondido</span>' : (m.leido ? '<span class="msg-tag leido" style="background:#e0f2fe;color:#0284c7;">Leído</span>' : '<span class="msg-tag pendiente">Nuevo</span>')}</div>
                 </div>
             </div>`;
         }).join('');
