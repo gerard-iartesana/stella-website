@@ -60,11 +60,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Custom Confirm ---
     let pendingConfirmCallback = null;
-    function showConfirm(message, onConfirm) {
+    window.showConfirm = function(message, onConfirm) {
         confirmMessage.textContent = message;
         pendingConfirmCallback = onConfirm;
         confirmOverlay.classList.add('active');
-    }
+    };
     function hideConfirm() {
         confirmOverlay.classList.remove('active');
         pendingConfirmCallback = null;

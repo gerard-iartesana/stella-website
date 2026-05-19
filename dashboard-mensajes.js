@@ -90,12 +90,17 @@ const MensajesModule = {
         if (badge) { badge.textContent = count; badge.style.display = count > 0 ? 'inline-block' : 'none'; }
     },
 
-    openMessage(idx) {
+    async openMessage(idx) {
         this.currentMsgIndex = idx;
         const m = this.mensajes[idx];
         if (!m) return;
 
-        m.leido = true;
+        if (!m.leido) {
+            m.leido = true;
+            if (m.id && typeof supabaseClient !== 'undefined' && supabaseClient) {
+                await supabaseClient.from('mensajes').update({ leido: true }).eq('id', m.id);
+            }
+        }
         this.render();
         this.updateBadge();
 
@@ -121,22 +126,41 @@ const MensajesModule = {
         this.currentMsgIndex = null;
     },
 
-    saveReply() {
+    async saveReply() {
         if (this.currentMsgIndex === null) return;
         const input = document.getElementById('msg-respuesta-input');
         const m = this.mensajes[this.currentMsgIndex];
         m.respuesta = input.value;
         m.respondido = input.value.trim().length > 0;
+        
+        if (m.id && typeof supabaseClient !== 'undefined' && supabaseClient) {
+            await supabaseClient.from('mensajes').update({ respuesta: m.respuesta, respondido: m.respondido }).eq('id', m.id);
+        }
+        
         this.render();
         this.closeModal();
     },
 
     deleteCurrent() {
         if (this.currentMsgIndex === null) return;
-        this.mensajes.splice(this.currentMsgIndex, 1);
-        this.render();
-        this.updateBadge();
-        this.closeModal();
+        
+        const deleteAction = async () => {
+            const m = this.mensajes[this.currentMsgIndex];
+            if (m.id && typeof supabaseClient !== 'undefined' && supabaseClient) {
+                await supabaseClient.from('mensajes').delete().eq('id', m.id);
+            }
+            this.mensajes.splice(this.currentMsgIndex, 1);
+            this.currentMsgIndex = null;
+            this.render();
+            this.updateBadge();
+            this.closeModal();
+        };
+
+        if (typeof window.showConfirm !== 'undefined') {
+            window.showConfirm('¿Estás seguro de que quieres eliminar este mensaje?', deleteAction);
+        } else if (confirm('¿Estás seguro de que quieres eliminar este mensaje?')) {
+            deleteAction();
+        }
     }
 };
 
@@ -302,42 +326,86 @@ const CitasModule = {
         this.currentCitaId = null;
     },
 
-    saveCita() {
+    async saveCita() {
         const id = document.getElementById('cita-id').value;
-        const cita = {
-            id: id || `cita-${Date.now()}`,
+        const isNew = !id;
+        
+        const citaData = {
             nombre_cliente: document.getElementById('cita-nombre').value,
             email: document.getElementById('cita-email').value,
             telefono: document.getElementById('cita-telefono').value,
             servicio: document.getElementById('cita-servicio').value,
             fecha: document.getElementById('cita-fecha').value,
             hora_inicio: document.getElementById('cita-hora-inicio').value,
-            hora_fin: document.getElementById('cita-hora-fin').value,
+            hora_fin: document.getElementById('cita-hora-fin').value || null,
             estado: document.getElementById('cita-estado').value,
             notas: document.getElementById('cita-notas').value
         };
 
-        if (id) {
-            const idx = this.citas.findIndex(c => c.id === id);
-            if (idx >= 0) this.citas[idx] = cita;
+        if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+            if (isNew) {
+                const { data, error } = await supabaseClient.from('citas').insert([citaData]).select();
+                if (!error && data && data.length > 0) {
+                    this.citas.push(data[0]);
+                } else {
+                    console.error('Error creating cita:', error);
+                    citaData.id = `cita-${Date.now()}`;
+                    this.citas.push(citaData);
+                }
+            } else {
+                const { error } = await supabaseClient.from('citas').update(citaData).eq('id', id);
+                if (error) console.error('Error updating cita:', error);
+                
+                const idx = this.citas.findIndex(c => String(c.id) === String(id));
+                if (idx >= 0) this.citas[idx] = { ...this.citas[idx], ...citaData };
+            }
         } else {
-            this.citas.push(cita);
+            citaData.id = id || `cita-${Date.now()}`;
+            if (isNew) {
+                this.citas.push(citaData);
+            } else {
+                const idx = this.citas.findIndex(c => String(c.id) === String(id));
+                if (idx >= 0) this.citas[idx] = citaData;
+            }
         }
 
         this.renderCalendar();
         this.updateBadge();
         this.closeCitaModal();
+        
         // Refresh day detail if open
         const panel = document.getElementById('citas-day-detail');
-        if (panel.style.display !== 'none') this.showDayDetail(cita.fecha);
+        if (panel.style.display !== 'none') {
+            this.showDayDetail(document.getElementById('cita-fecha').value);
+        }
     },
 
-    deleteCita() {
+    async deleteCita() {
         const id = document.getElementById('cita-id').value;
         if (!id) return;
-        this.citas = this.citas.filter(c => c.id !== id);
-        this.renderCalendar();
-        this.updateBadge();
-        this.closeCitaModal();
+        
+        const deleteAction = async () => {
+            if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                const { error } = await supabaseClient.from('citas').delete().eq('id', id);
+                if (error) console.error('Error deleting cita:', error);
+            }
+            
+            this.citas = this.citas.filter(c => String(c.id) !== String(id));
+            this.renderCalendar();
+            this.updateBadge();
+            this.closeCitaModal();
+            
+            const panel = document.getElementById('citas-day-detail');
+            if (panel.style.display !== 'none') {
+                const currentFecha = document.getElementById('cita-fecha').value;
+                this.showDayDetail(currentFecha);
+            }
+        };
+
+        if (typeof window.showConfirm !== 'undefined') {
+            window.showConfirm('¿Estás seguro de que quieres eliminar esta cita?', deleteAction);
+        } else if (confirm('¿Estás seguro de que quieres eliminar esta cita?')) {
+            deleteAction();
+        }
     }
 };
