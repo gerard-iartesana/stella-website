@@ -87,11 +87,11 @@ document.addEventListener('DOMContentLoaded', () => {
             
             try {
                 // Ensure Supabase is initialized
-                if (typeof initSupabase === 'function' && typeof supabaseClient === 'undefined') {
+                if (typeof initSupabase === 'function' && !supabaseClient) {
                     initSupabase();
                 }
 
-                if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                if (supabaseClient) {
                     const { error } = await supabaseClient
                         .from('mensajes')
                         .insert([{
