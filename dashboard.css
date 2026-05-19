@@ -51,6 +51,15 @@ body {
     justify-content: center;
 }
 
+.sidebar-logo-link {
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+.sidebar-logo-link:hover {
+    transform: scale(1.05);
+}
+
 .sidebar-logo {
     width: 60px;
     height: auto;
