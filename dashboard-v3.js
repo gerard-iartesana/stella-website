@@ -1,32 +1,27 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- State ---
-    let appData = {
-        servicios: [],
-        lookbook: []
-    };
+    let appData = { servicios: [], lookbook: [] };
+
+    // --- Init Supabase ---
+    if (typeof initSupabase === 'function') initSupabase();
+    updateConnectionStatus();
 
     // --- DOM Elements ---
     const navBtns = document.querySelectorAll('.nav-btn');
     const viewSections = document.querySelectorAll('.view-section');
     const serviciosList = document.getElementById('servicios-list');
     const lookbookList = document.getElementById('lookbook-list');
-    
-    // Modals
     const modalOverlay = document.getElementById('modal-overlay');
-    const modals = document.querySelectorAll('.modal');
+    const modals = document.querySelectorAll('#modal-overlay .modal');
     const closeBtns = document.querySelectorAll('#modal-overlay .close-modal');
-    
-    // Forms
     const servicioForm = document.getElementById('servicio-form');
     const lookbookForm = document.getElementById('lookbook-form');
-    
-    // Buttons
     const addServicioBtn = document.getElementById('add-servicio-btn');
     const addLookbookBtn = document.getElementById('add-lookbook-btn');
     const saveAllBtn = document.getElementById('save-all-btn');
     const saveStatus = document.getElementById('save-status');
 
-    // Custom Confirm Modal Elements
+    // Custom Confirm Modal
     const confirmOverlay = document.getElementById('confirm-overlay');
     const confirmMessage = document.getElementById('confirm-message');
     const confirmOkBtn = document.getElementById('confirm-ok-btn');
@@ -41,53 +36,60 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Init ---
     fetchData();
 
-    // --- Custom Confirm Function ---
-    let pendingConfirmCallback = null;
+    // Init Mensajes & Citas modules
+    if (typeof MensajesModule !== 'undefined') MensajesModule.init();
+    if (typeof CitasModule !== 'undefined') CitasModule.init(appData.servicios);
 
+    // Init Upload Zones
+    if (typeof UploadModule !== 'undefined') {
+        UploadModule.setupZone('servicio-upload-zone', 'servicio-file-input', 'servicio-previews', 'servicio-upload-progress', 'servicio-progress-fill', 'servicio-progress-text', { multiple: true, folder: 'servicios' });
+        UploadModule.setupZone('lookbook-upload-zone', 'lookbook-file-input', 'lookbook-previews', 'lookbook-upload-progress', 'lookbook-progress-fill', 'lookbook-progress-text', { multiple: false, folder: 'lookbook' });
+    }
+
+    // --- Connection Status ---
+    function updateConnectionStatus() {
+        const dot = document.querySelector('.status-dot');
+        const label = document.querySelector('.status-label');
+        if (!dot || !label) return;
+        if (typeof isSupabaseConfigured === 'function' && isSupabaseConfigured()) {
+            dot.className = 'status-dot connected';
+            label.textContent = 'Supabase';
+        } else {
+            dot.className = 'status-dot local';
+            label.textContent = 'Modo Local';
+        }
+    }
+
+    // --- Custom Confirm ---
+    let pendingConfirmCallback = null;
     function showConfirm(message, onConfirm) {
         confirmMessage.textContent = message;
         pendingConfirmCallback = onConfirm;
         confirmOverlay.classList.add('active');
     }
-
     function hideConfirm() {
         confirmOverlay.classList.remove('active');
         pendingConfirmCallback = null;
     }
-
-    confirmOkBtn.addEventListener('click', () => {
-        if (pendingConfirmCallback) {
-            pendingConfirmCallback();
-        }
-        hideConfirm();
-    });
-
+    confirmOkBtn.addEventListener('click', () => { if (pendingConfirmCallback) pendingConfirmCallback(); hideConfirm(); });
     confirmCancelBtn.addEventListener('click', hideConfirm);
     confirmCancelX.addEventListener('click', hideConfirm);
-
-    confirmOverlay.addEventListener('click', (e) => {
-        if (e.target === confirmOverlay) hideConfirm();
-    });
+    confirmOverlay.addEventListener('click', (e) => { if (e.target === confirmOverlay) hideConfirm(); });
 
     // --- Navigation ---
     navBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             const viewId = btn.getAttribute('data-view');
-            
             navBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            
             viewSections.forEach(section => {
                 section.classList.remove('active');
-                if (section.id === `view-${viewId}`) {
-                    section.classList.add('active');
-                }
+                if (section.id === `view-${viewId}`) section.classList.add('active');
             });
         });
     });
 
     // --- API Calls ---
-
     async function fetchData() {
         try {
             const response = await fetch(API_URL);
@@ -95,68 +97,53 @@ document.addEventListener('DOMContentLoaded', () => {
                 appData = await response.json();
                 renderServicios();
                 renderLookbook();
-            } else {
-                throw new Error('Failed to fetch data');
-            }
+                // Update citas module with servicios list
+                if (typeof CitasModule !== 'undefined') CitasModule.serviciosList = appData.servicios;
+            } else { throw new Error('Failed to fetch data'); }
         } catch (error) {
             console.error('Error fetching data:', error);
-            alert('Asegúrate de que el servidor Node.js esté corriendo (node server.js)');
+            // Don't alert, just log — modules have their own demo data
         }
     }
 
     async function saveData() {
         saveStatus.textContent = 'Guardando...';
         saveStatus.className = 'status-msg';
-        
         try {
             const response = await fetch(API_URL, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(appData)
             });
-            
             if (response.ok) {
-                saveStatus.textContent = 'Guardado exitosamente!';
+                saveStatus.textContent = '✓ Guardado';
                 saveStatus.classList.add('status-success');
                 setTimeout(() => { saveStatus.textContent = ''; }, 3000);
-            } else {
-                throw new Error('Failed to save data');
-            }
+            } else { throw new Error('Failed to save'); }
         } catch (error) {
             console.error('Error saving data:', error);
-            saveStatus.textContent = 'Error al guardar.';
+            saveStatus.textContent = 'Error al guardar';
             saveStatus.classList.add('status-error');
         }
     }
-
     saveAllBtn.addEventListener('click', saveData);
 
-    // --- Modals Logic ---
+    // --- Modal Logic ---
     function openModal(modalId) {
         modalOverlay.classList.add('active');
         document.getElementById(modalId).classList.add('active');
     }
-
     function closeModal() {
         modalOverlay.classList.remove('active');
         modals.forEach(m => m.classList.remove('active'));
     }
+    closeBtns.forEach(btn => btn.addEventListener('click', closeModal));
+    modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
 
-    closeBtns.forEach(btn => {
-        btn.addEventListener('click', closeModal);
-    });
-
-    modalOverlay.addEventListener('click', (e) => {
-        if (e.target === modalOverlay) closeModal();
-    });
-
-    // --- Servicios Logic (Event Delegation) ---
+    // --- Servicios Logic ---
     serviciosList.addEventListener('click', (e) => {
         const deleteBtn = e.target.closest('.delete-servicio');
         const editBtn = e.target.closest('.edit-servicio');
-
         if (deleteBtn) {
             const idx = parseInt(deleteBtn.dataset.index);
             showConfirm('¿Estás seguro de eliminar este servicio?', () => {
@@ -164,9 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderServicios();
                 saveData();
             });
-        } else if (editBtn) {
-            editServicio(editBtn.dataset.index);
-        }
+        } else if (editBtn) { editServicio(editBtn.dataset.index); }
     });
 
     function renderServicios() {
@@ -183,8 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="item-actions">
                     <button class="btn btn-secondary btn-small edit-servicio" data-index="${index}">Editar</button>
                     <button class="btn btn-danger btn-small delete-servicio" data-index="${index}">Eliminar</button>
-                </div>
-            `;
+                </div>`;
             serviciosList.appendChild(card);
         });
     }
@@ -193,26 +177,26 @@ document.addEventListener('DOMContentLoaded', () => {
         servicioForm.reset();
         document.getElementById('servicio-id').value = '';
         document.getElementById('servicio-modal-title').textContent = 'Añadir Servicio';
+        if (typeof UploadModule !== 'undefined') UploadModule.clearZone('servicio-upload-zone', 'servicio-previews');
         openModal('servicio-modal');
     });
 
     function editServicio(index) {
-        const servicio = appData.servicios[index];
+        const s = appData.servicios[index];
         document.getElementById('servicio-id').value = index;
-        document.getElementById('servicio-titulo').value = servicio.titulo;
-        document.getElementById('servicio-descripcion').value = servicio.descripcion;
-        document.getElementById('servicio-duracion').value = servicio.duracion;
-        document.getElementById('servicio-precio').value = servicio.precio;
-        document.getElementById('servicio-imagenes').value = servicio.imagenes.join(', ');
-        document.getElementById('servicio-incluye').value = servicio.incluye.join('\n');
-        
+        document.getElementById('servicio-titulo').value = s.titulo;
+        document.getElementById('servicio-descripcion').value = s.descripcion;
+        document.getElementById('servicio-duracion').value = s.duracion;
+        document.getElementById('servicio-precio').value = s.precio;
+        document.getElementById('servicio-imagenes').value = s.imagenes.join(', ');
+        document.getElementById('servicio-incluye').value = s.incluye.join('\n');
+        if (typeof UploadModule !== 'undefined') UploadModule.setUrls('servicio-upload-zone', 'servicio-previews', s.imagenes || []);
         document.getElementById('servicio-modal-title').textContent = 'Editar Servicio';
         openModal('servicio-modal');
     }
 
     servicioForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        
         const id = document.getElementById('servicio-id').value;
         const newServicio = {
             id: document.getElementById('servicio-titulo').value.toLowerCase().replace(/\s+/g, '-'),
@@ -220,27 +204,22 @@ document.addEventListener('DOMContentLoaded', () => {
             descripcion: document.getElementById('servicio-descripcion').value,
             duracion: document.getElementById('servicio-duracion').value,
             precio: document.getElementById('servicio-precio').value,
-            imagenes: document.getElementById('servicio-imagenes').value.split(',').map(s => s.trim()).filter(s => s),
+            imagenes: (typeof UploadModule !== 'undefined' && UploadModule.getUrls('servicio-upload-zone').length > 0)
+                ? UploadModule.getUrls('servicio-upload-zone')
+                : document.getElementById('servicio-imagenes').value.split(',').map(s => s.trim()).filter(s => s),
             incluye: document.getElementById('servicio-incluye').value.split('\n').map(s => s.trim()).filter(s => s)
         };
-
-        if (id === '') {
-            appData.servicios.push(newServicio);
-        } else {
-            newServicio.id = appData.servicios[id].id;
-            appData.servicios[id] = newServicio;
-        }
-
+        if (id === '') { appData.servicios.push(newServicio); }
+        else { newServicio.id = appData.servicios[id].id; appData.servicios[id] = newServicio; }
         renderServicios();
         closeModal();
         saveData();
     });
 
-    // --- Lookbook Logic (Event Delegation) ---
+    // --- Lookbook Logic ---
     lookbookList.addEventListener('click', (e) => {
         const deleteBtn = e.target.closest('.delete-lookbook');
         const editBtn = e.target.closest('.edit-lookbook');
-
         if (deleteBtn) {
             const idx = parseInt(deleteBtn.dataset.index);
             showConfirm('¿Estás seguro de eliminar esta imagen del lookbook?', () => {
@@ -248,9 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderLookbook();
                 saveData();
             });
-        } else if (editBtn) {
-            editLookbook(editBtn.dataset.index);
-        }
+        } else if (editBtn) { editLookbook(editBtn.dataset.index); }
     });
 
     function renderLookbook() {
@@ -267,8 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="item-actions" style="display: flex; gap: 0.5rem;">
                     <button class="btn btn-secondary btn-small edit-lookbook" style="flex: 1;" data-index="${index}">Editar</button>
                     <button class="btn btn-danger btn-small delete-lookbook" style="flex: 1;" data-index="${index}">Eliminar</button>
-                </div>
-            `;
+                </div>`;
             lookbookList.appendChild(card);
         });
     }
@@ -277,6 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
         lookbookForm.reset();
         document.getElementById('lookbook-id').value = '';
         document.getElementById('lookbook-modal-title').textContent = 'Añadir Imagen Lookbook';
+        if (typeof UploadModule !== 'undefined') UploadModule.clearZone('lookbook-upload-zone', 'lookbook-previews');
         openModal('lookbook-modal');
     });
 
@@ -286,31 +263,26 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('lookbook-imagen').value = item.imagen;
         document.getElementById('lookbook-categoria').value = item.categoria;
         document.getElementById('lookbook-alt').value = item.alt;
-        
+        if (typeof UploadModule !== 'undefined') UploadModule.setUrls('lookbook-upload-zone', 'lookbook-previews', item.imagen ? [item.imagen] : []);
         document.getElementById('lookbook-modal-title').textContent = 'Editar Imagen Lookbook';
         openModal('lookbook-modal');
     }
 
     lookbookForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        
         const id = document.getElementById('lookbook-id').value;
         const newItem = {
             id: id === '' ? `item${Date.now()}` : appData.lookbook[id].id,
-            imagen: document.getElementById('lookbook-imagen').value,
+            imagen: (typeof UploadModule !== 'undefined' && UploadModule.getUrls('lookbook-upload-zone').length > 0)
+                ? UploadModule.getUrls('lookbook-upload-zone')[0]
+                : document.getElementById('lookbook-imagen').value,
             categoria: document.getElementById('lookbook-categoria').value,
             alt: document.getElementById('lookbook-alt').value
         };
-
-        if (id === '') {
-            appData.lookbook.push(newItem);
-        } else {
-            appData.lookbook[id] = newItem;
-        }
-
+        if (id === '') { appData.lookbook.push(newItem); }
+        else { appData.lookbook[id] = newItem; }
         renderLookbook();
         closeModal();
         saveData();
     });
-
 });

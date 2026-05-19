@@ -14,13 +14,29 @@
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-header">
-                <h2>Roots CMS</h2>
+                <img src="./imagenes/Stella logo dorado transparente-05.png" alt="Roots by Stella Logo" class="sidebar-logo">
             </div>
             <nav class="sidebar-nav">
-                <button class="nav-btn active" data-view="servicios">Servicios</button>
-                <button class="nav-btn" data-view="lookbook">Lookbook</button>
+                <button class="nav-btn active" data-view="servicios">
+                    <span class="nav-icon">✂️</span> Servicios
+                </button>
+                <button class="nav-btn" data-view="lookbook">
+                    <span class="nav-icon">📸</span> Lookbook
+                </button>
+                <button class="nav-btn" data-view="mensajes">
+                    <span class="nav-icon">💬</span> Mensajes
+                    <span class="nav-badge" id="mensajes-badge" style="display:none;">0</span>
+                </button>
+                <button class="nav-btn" data-view="citas">
+                    <span class="nav-icon">📅</span> Citas
+                    <span class="nav-badge" id="citas-badge" style="display:none;">0</span>
+                </button>
             </nav>
             <div class="sidebar-footer">
+                <div class="connection-status" id="connection-status">
+                    <span class="status-dot local"></span>
+                    <span class="status-label">Modo Local</span>
+                </div>
                 <button id="save-all-btn" class="btn btn-primary btn-full">Guardar Cambios</button>
                 <div id="save-status" class="status-msg"></div>
             </div>
@@ -52,10 +68,63 @@
                     <!-- Items de lookbook inyectados por JS -->
                 </div>
             </section>
+
+            <!-- Vista Mensajes (NUEVA) -->
+            <section id="view-mensajes" class="view-section">
+                <div class="section-header">
+                    <h2>Bandeja de Mensajes</h2>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary btn-small" id="filter-no-leidos">No leídos</button>
+                        <button class="btn btn-secondary btn-small active" id="filter-todos">Todos</button>
+                    </div>
+                </div>
+                
+                <div id="mensajes-list" class="items-list">
+                    <div class="empty-state" id="mensajes-empty">
+                        <span class="empty-icon">💬</span>
+                        <p>No hay mensajes todavía.</p>
+                        <p class="text-muted">Los mensajes del formulario de contacto aparecerán aquí.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Vista Citas / Calendario (NUEVA) -->
+            <section id="view-citas" class="view-section">
+                <div class="section-header">
+                    <h2>Calendario de Citas</h2>
+                    <button class="btn btn-secondary" id="add-cita-btn">+ Nueva Cita</button>
+                </div>
+
+                <!-- Navegación del calendario -->
+                <div class="calendar-nav">
+                    <button class="btn btn-small btn-secondary" id="cal-prev">← Anterior</button>
+                    <h3 id="cal-current-week" class="cal-title">Semana actual</h3>
+                    <button class="btn btn-small btn-secondary" id="cal-next">Siguiente →</button>
+                    <button class="btn btn-small btn-secondary" id="cal-today">Hoy</button>
+                </div>
+
+                <!-- Calendario semanal -->
+                <div class="calendar-grid" id="calendar-grid">
+                    <!-- Generado por JS -->
+                </div>
+
+                <!-- Lista de citas del día seleccionado -->
+                <div class="citas-day-detail" id="citas-day-detail" style="display: none;">
+                    <div class="day-detail-header">
+                        <h3 id="detail-day-title">Citas del día</h3>
+                        <button class="btn btn-small btn-secondary" id="close-day-detail">✕</button>
+                    </div>
+                    <div id="citas-day-list" class="items-list">
+                        <!-- Citas del día inyectadas por JS -->
+                    </div>
+                </div>
+            </section>
         </main>
     </div>
 
-    <!-- Modals -->
+    <!-- ==================== MODALS ==================== -->
+
+    <!-- Modal Overlay para Servicios y Lookbook -->
     <div id="modal-overlay" class="modal-overlay">
         <div class="modal" id="servicio-modal">
             <div class="modal-header">
@@ -84,8 +153,17 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>Imágenes (URLs separadas por coma)</label>
-                        <input type="text" id="servicio-imagenes" placeholder="./imagenes/img1.jpg, ./imagenes/img2.jpg">
+                        <label>Imágenes</label>
+                        <div class="upload-zone" id="servicio-upload-zone">
+                            <input type="file" id="servicio-file-input" accept="image/*" multiple style="display:none;">
+                            <p class="upload-label">📁 Arrastra imágenes aquí o <span class="upload-link">selecciona archivos</span></p>
+                            <div class="upload-progress" id="servicio-upload-progress" style="display:none;">
+                                <div class="progress-bar"><div class="progress-fill" id="servicio-progress-fill"></div></div>
+                                <span class="progress-text" id="servicio-progress-text">Subiendo...</span>
+                            </div>
+                        </div>
+                        <div class="uploaded-previews" id="servicio-previews"></div>
+                        <input type="hidden" id="servicio-imagenes">
                     </div>
                     <div class="form-group">
                         <label>Qué incluye (Items separados por línea)</label>
@@ -105,8 +183,17 @@
                 <form id="lookbook-form">
                     <input type="hidden" id="lookbook-id">
                     <div class="form-group">
-                        <label>URL de la Imagen</label>
-                        <input type="text" id="lookbook-imagen" required>
+                        <label>Imagen</label>
+                        <div class="upload-zone" id="lookbook-upload-zone">
+                            <input type="file" id="lookbook-file-input" accept="image/*" style="display:none;">
+                            <p class="upload-label">📁 Arrastra imagen aquí o <span class="upload-link">selecciona archivo</span></p>
+                            <div class="upload-progress" id="lookbook-upload-progress" style="display:none;">
+                                <div class="progress-bar"><div class="progress-fill" id="lookbook-progress-fill"></div></div>
+                                <span class="progress-text" id="lookbook-progress-text">Subiendo...</span>
+                            </div>
+                        </div>
+                        <div class="uploaded-previews" id="lookbook-previews"></div>
+                        <input type="hidden" id="lookbook-imagen">
                     </div>
                     <div class="form-group">
                         <label>Categoría</label>
@@ -122,6 +209,109 @@
                         <input type="text" id="lookbook-alt">
                     </div>
                     <button type="submit" class="btn btn-primary">Guardar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Responder Mensaje -->
+    <div id="mensaje-modal-overlay" class="modal-overlay">
+        <div class="modal" id="mensaje-modal" style="display: block; max-width: 600px;">
+            <div class="modal-header">
+                <h3 id="mensaje-modal-title">Ver Mensaje</h3>
+                <button class="close-modal" id="close-mensaje-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="mensaje-detail">
+                    <div class="mensaje-meta">
+                        <p><strong>De:</strong> <span id="msg-detail-nombre"></span></p>
+                        <p><strong>Email:</strong> <span id="msg-detail-email"></span></p>
+                        <p><strong>Teléfono:</strong> <span id="msg-detail-telefono"></span></p>
+                        <p><strong>Asunto:</strong> <span id="msg-detail-asunto"></span></p>
+                        <p><strong>Fecha:</strong> <span id="msg-detail-fecha"></span></p>
+                    </div>
+                    <div class="mensaje-content-box">
+                        <p id="msg-detail-mensaje"></p>
+                    </div>
+                    <div class="mensaje-respuesta-box" id="msg-respuesta-box" style="display: none;">
+                        <h4>Tu respuesta:</h4>
+                        <p id="msg-detail-respuesta"></p>
+                    </div>
+                </div>
+                <div class="form-group" id="msg-reply-form" style="margin-top: 1.5rem;">
+                    <label>Escribir respuesta (nota interna)</label>
+                    <textarea id="msg-respuesta-input" rows="3" placeholder="Escribe tu respuesta o nota..."></textarea>
+                    <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                        <button class="btn btn-primary" id="msg-reply-btn">Guardar Respuesta</button>
+                        <button class="btn btn-danger btn-small" id="msg-delete-btn">Eliminar Mensaje</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Crear/Editar Cita -->
+    <div id="cita-modal-overlay" class="modal-overlay">
+        <div class="modal" id="cita-modal" style="display: block; max-width: 550px;">
+            <div class="modal-header">
+                <h3 id="cita-modal-title">Nueva Cita</h3>
+                <button class="close-modal" id="close-cita-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="cita-form">
+                    <input type="hidden" id="cita-id">
+                    <div class="form-group">
+                        <label>Nombre de la clienta</label>
+                        <input type="text" id="cita-nombre" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="cita-email">
+                        </div>
+                        <div class="form-group">
+                            <label>Teléfono</label>
+                            <input type="tel" id="cita-telefono">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Servicio</label>
+                        <select id="cita-servicio">
+                            <option value="">— Seleccionar servicio —</option>
+                            <!-- Opciones inyectadas por JS -->
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Fecha</label>
+                            <input type="date" id="cita-fecha" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Hora inicio</label>
+                            <input type="time" id="cita-hora-inicio" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Hora fin</label>
+                            <input type="time" id="cita-hora-fin">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Estado</label>
+                        <select id="cita-estado">
+                            <option value="pendiente">Pendiente</option>
+                            <option value="confirmada">Confirmada</option>
+                            <option value="completada">Completada</option>
+                            <option value="cancelada">Cancelada</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Notas</label>
+                        <textarea id="cita-notas" rows="2" placeholder="Notas adicionales..."></textarea>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button type="submit" class="btn btn-primary" style="flex: 1;">Guardar Cita</button>
+                        <button type="button" class="btn btn-danger btn-small" id="cita-delete-btn" style="display: none;">Eliminar</button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -144,6 +334,11 @@
         </div>
     </div>
 
+    <!-- Supabase SDK (CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase.js"></script>
+    <script src="dashboard-upload.js"></script>
+    <script src="dashboard-mensajes.js"></script>
     <script src="dashboard-v3.js"></script>
 </body>
 </html>
