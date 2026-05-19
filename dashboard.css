@@ -100,7 +100,20 @@ body {
 .nav-icon {
     font-size: 1.1rem;
     width: 24px;
+    height: 24px;
     text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-icon svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+    stroke-width: 2;
+    fill: none;
+    transition: stroke 0.3s ease;
 }
 
 .nav-badge {
