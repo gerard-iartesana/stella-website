@@ -297,12 +297,26 @@ const CitasModule = {
             document.getElementById('cita-estado').value = c.estado;
             document.getElementById('cita-notas').value = c.notas || '';
             deleteBtn.style.display = 'block';
+
+            const fotoContainer = document.getElementById('cita-foto-container');
+            const fotoPreview = document.getElementById('cita-foto-preview');
+            const fotoLink = document.getElementById('cita-foto-link');
+            if (c.foto_url) {
+                fotoPreview.src = c.foto_url;
+                fotoLink.href = c.foto_url;
+                fotoContainer.style.display = 'block';
+            } else {
+                fotoContainer.style.display = 'none';
+                fotoPreview.src = '';
+                fotoLink.href = '#';
+            }
         } else {
             this.currentCitaId = null;
             document.getElementById('cita-modal-title').textContent = 'Nueva Cita';
             document.getElementById('cita-id').value = '';
             document.getElementById('cita-fecha').value = new Date().toISOString().split('T')[0];
             deleteBtn.style.display = 'none';
+            document.getElementById('cita-foto-container').style.display = 'none';
         }
 
         this.populateServiciosSelect();

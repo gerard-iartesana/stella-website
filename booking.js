@@ -441,6 +441,29 @@ const BookingModule = {
             if (typeof initSupabase === 'function' && !supabaseClient) initSupabase();
 
             if (supabaseClient) {
+                // Upload photo if present
+                const fotoInput = document.getElementById('booking-foto');
+                if (fotoInput && fotoInput.files.length > 0) {
+                    if (statusDiv) { statusDiv.textContent = 'Subiendo foto...'; statusDiv.style.color = 'var(--text-muted)'; }
+                    const file = fotoInput.files[0];
+                    const ext = file.name.split('.').pop();
+                    const fileName = `citas/${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${ext}`;
+                    
+                    const { data: uploadData, error: uploadError } = await supabaseClient.storage
+                        .from('imagenes')
+                        .upload(fileName, file, { cacheControl: '3600', upsert: false });
+                        
+                    if (uploadError) {
+                        console.error('Error uploading photo:', uploadError);
+                        // We continue even if photo fails, or we could throw
+                        cita.notas += '\n[Nota: El cliente intentó subir una foto pero hubo un error]';
+                    } else if (uploadData) {
+                        const SUPABASE_URL = supabaseClient.supabaseUrl || 'https://ojhvwskgsovvlzqastaf.supabase.co';
+                        cita.foto_url = `${SUPABASE_URL}/storage/v1/object/public/imagenes/${uploadData.path}`;
+                    }
+                }
+
+                if (statusDiv) { statusDiv.textContent = 'Guardando cita...'; }
                 const { error } = await supabaseClient.from('citas').insert([cita]);
                 if (error) throw error;
             } else {
