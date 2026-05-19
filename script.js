@@ -211,28 +211,47 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Dynamic Data Fetching (Servicios & Lookbook) ---
-    const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-        ? 'http://localhost:3000/api/data' 
-        : '/api/data';
-
     const serviciosContainer = document.getElementById('servicios-container');
     const lookbookGrid = document.getElementById('gallery-grid');
     
     if (serviciosContainer || lookbookGrid) {
+        if (typeof supabase !== 'undefined' && typeof supabaseClient !== 'undefined') {
+            // Fetch from Supabase
+            Promise.all([
+                supabaseClient.from('servicios').select('*').order('orden', { ascending: true }),
+                supabaseClient.from('lookbook').select('*').order('orden', { ascending: true })
+            ]).then(([resServicios, resLookbook]) => {
+                if (serviciosContainer && resServicios.data && resServicios.data.length > 0) {
+                    renderServicios(resServicios.data);
+                } else if (serviciosContainer) {
+                    fetchLocalFallback(); // Fallback if empty
+                }
+                
+                if (lookbookGrid && resLookbook.data && resLookbook.data.length > 0) {
+                    renderLookbook(resLookbook.data);
+                }
+            }).catch(err => {
+                console.error('Error fetching from Supabase:', err);
+                fetchLocalFallback();
+            });
+        } else {
+            fetchLocalFallback();
+        }
+    }
+
+    function fetchLocalFallback() {
+        const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+            ? 'http://localhost:3000/api/data' : '/api/data';
+            
         fetch(API_URL)
             .then(res => res.json())
             .then(data => {
-                if (serviciosContainer && data.servicios) {
-                    renderServicios(data.servicios);
-                }
-                if (lookbookGrid && data.lookbook) {
-                    renderLookbook(data.lookbook);
-                }
+                if (serviciosContainer && data.servicios) renderServicios(data.servicios);
+                if (lookbookGrid && data.lookbook) renderLookbook(data.lookbook);
             })
             .catch(err => {
-                console.error('Error fetching data:', err);
-                if (serviciosContainer) serviciosContainer.innerHTML = '<p class="text-center">Error cargando servicios. Asegúrate de que el servidor local esté activo.</p>';
-                if (lookbookGrid) lookbookGrid.innerHTML = '<p class="text-center">Error cargando galería.</p>';
+                console.error('Error fetching fallback data:', err);
+                if (serviciosContainer) serviciosContainer.innerHTML = '<p class="text-center">Error cargando servicios.</p>';
             });
     }
 

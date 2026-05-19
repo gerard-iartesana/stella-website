@@ -91,24 +91,78 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- API Calls ---
     async function fetchData() {
+        if (typeof supabase !== 'undefined' && supabaseClient) {
+            try {
+                const { data: sData, error: sErr } = await supabaseClient.from('servicios').select('*').order('orden', { ascending: true });
+                const { data: lData, error: lErr } = await supabaseClient.from('lookbook').select('*').order('orden', { ascending: true });
+                if (sErr) throw sErr;
+
+                // Si está vacío, migramos desde el local
+                if (sData.length === 0 && lData.length === 0) {
+                    console.log('Supabase vacío. Migrando desde Vercel/Local...');
+                    const res = await fetch(API_URL);
+                    if (res.ok) {
+                        const localData = await res.json();
+                        const sToInsert = (localData.servicios || []).map((s, i) => { const {id, ...rest} = s; return { ...rest, orden: i }; });
+                        const lToInsert = (localData.lookbook || []).map((l, i) => { const {id, ...rest} = l; return { ...rest, orden: i }; });
+                        if (sToInsert.length > 0) await supabaseClient.from('servicios').insert(sToInsert);
+                        if (lToInsert.length > 0) await supabaseClient.from('lookbook').insert(lToInsert);
+                        return fetchData(); // Re-fetch para obtener UUIDs
+                    }
+                }
+
+                appData.servicios = sData || [];
+                appData.lookbook = lData || [];
+            } catch (err) {
+                console.error('Error Supabase fetch:', err);
+                await fetchLocalFallback();
+            }
+        } else {
+            await fetchLocalFallback();
+        }
+        
+        renderServicios();
+        renderLookbook();
+        if (typeof CitasModule !== 'undefined') CitasModule.serviciosList = appData.servicios;
+    }
+
+    async function fetchLocalFallback() {
         try {
-            const response = await fetch(API_URL);
-            if (response.ok) {
-                appData = await response.json();
-                renderServicios();
-                renderLookbook();
-                // Update citas module with servicios list
-                if (typeof CitasModule !== 'undefined') CitasModule.serviciosList = appData.servicios;
-            } else { throw new Error('Failed to fetch data'); }
-        } catch (error) {
-            console.error('Error fetching data:', error);
-            // Don't alert, just log — modules have their own demo data
+            const res = await fetch(API_URL);
+            if (res.ok) appData = await res.json();
+        } catch (e) {
+            console.error('Error fetch local:', e);
         }
     }
 
     async function saveData() {
         saveStatus.textContent = 'Guardando...';
         saveStatus.className = 'status-msg';
+
+        if (typeof supabase !== 'undefined' && supabaseClient) {
+            try {
+                // Wipe and replace strategy (since arrays are small and Citas stores servicio as TEXT)
+                await supabaseClient.from('servicios').delete().neq('titulo', '000'); // Hack para borrar todos
+                await supabaseClient.from('lookbook').delete().neq('categoria', '000'); 
+
+                const sToInsert = appData.servicios.map((s, i) => { const {id, created_at, updated_at, ...rest} = s; return { ...rest, orden: i }; });
+                const lToInsert = appData.lookbook.map((l, i) => { const {id, created_at, ...rest} = l; return { ...rest, orden: i }; });
+
+                if (sToInsert.length > 0) await supabaseClient.from('servicios').insert(sToInsert);
+                if (lToInsert.length > 0) await supabaseClient.from('lookbook').insert(lToInsert);
+
+                // Fetch new IDs
+                await fetchData();
+                saveStatus.textContent = '✓ Guardado (Supabase)';
+                saveStatus.classList.add('status-success');
+                setTimeout(() => { saveStatus.textContent = ''; }, 3000);
+                return;
+            } catch (err) {
+                console.error('Error guardando en Supabase:', err);
+            }
+        }
+
+        // Fallback a API_URL local/Redis
         try {
             const response = await fetch(API_URL, {
                 method: 'POST',
@@ -116,10 +170,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify(appData)
             });
             if (response.ok) {
-                saveStatus.textContent = '✓ Guardado';
+                saveStatus.textContent = '✓ Guardado (API)';
                 saveStatus.classList.add('status-success');
                 setTimeout(() => { saveStatus.textContent = ''; }, 3000);
-            } else { throw new Error('Failed to save'); }
+            } else { throw new Error('Failed to save via API'); }
         } catch (error) {
             console.error('Error saving data:', error);
             saveStatus.textContent = 'Error al guardar';
