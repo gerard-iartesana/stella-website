@@ -286,7 +286,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderLookbook() {
         lookbookList.innerHTML = '';
-        appData.lookbook.forEach((item, index) => {
+        const reversed = [...appData.lookbook].reverse();
+        reversed.forEach((item) => {
+            const index = appData.lookbook.indexOf(item);
             const card = document.createElement('div');
             card.className = 'grid-item';
             card.innerHTML = `

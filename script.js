@@ -364,7 +364,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderLookbook(lookbook) {
         lookbookGrid.innerHTML = '';
-        lookbook.forEach(item => {
+        const reversed = [...lookbook].reverse();
+        reversed.forEach(item => {
             const div = document.createElement('div');
             div.className = 'gallery-item';
             div.setAttribute('data-category', item.categoria);
