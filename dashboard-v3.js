@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Init Supabase ---
     if (typeof initSupabase === 'function') initSupabase();
-    updateConnectionStatus();
 
     // --- DOM Elements ---
     const navBtns = document.querySelectorAll('.nav-btn');
@@ -57,20 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof UploadModule !== 'undefined') {
         UploadModule.setupZone('servicio-upload-zone', 'servicio-file-input', 'servicio-previews', 'servicio-upload-progress', 'servicio-progress-fill', 'servicio-progress-text', { multiple: true, folder: 'servicios' });
         UploadModule.setupZone('lookbook-upload-zone', 'lookbook-file-input', 'lookbook-previews', 'lookbook-upload-progress', 'lookbook-progress-fill', 'lookbook-progress-text', { multiple: false, folder: 'lookbook' });
-    }
-
-    // --- Connection Status ---
-    function updateConnectionStatus() {
-        const dot = document.querySelector('.status-dot');
-        const label = document.querySelector('.status-label');
-        if (!dot || !label) return;
-        if (typeof isSupabaseConfigured === 'function' && isSupabaseConfigured()) {
-            dot.className = 'status-dot connected';
-            label.textContent = 'Supabase';
-        } else {
-            dot.className = 'status-dot local';
-            label.textContent = 'Modo Local';
-        }
     }
 
     // --- Custom Confirm ---
