@@ -214,8 +214,7 @@ const CitasModule = {
 
     updateBadge() {
         const badge = document.getElementById('citas-badge');
-        const today = new Date().toISOString().split('T')[0];
-        const count = this.citas.filter(c => c.fecha === today && c.estado !== 'cancelada').length;
+        const count = this.citas.filter(c => c.estado === 'pendiente').length;
         if (badge) { badge.textContent = count; badge.style.display = count > 0 ? 'inline-block' : 'none'; }
     },
 
