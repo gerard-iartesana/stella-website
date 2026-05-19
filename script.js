@@ -36,31 +36,111 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Form submission dummy handler
-    const contactForm = document.getElementById('contact-form');
-    if (contactForm) {
-        contactForm.addEventListener('submit', (e) => {
+    // --- Formulario de Contacto (Index y Página de Contacto) ---
+    function setupContactForm(formId, prefix) {
+        const form = document.getElementById(formId);
+        if (!form) return;
+
+        // Dynamic CAPTCHA generation
+        const num1 = Math.floor(Math.random() * 10) + 1;
+        const num2 = Math.floor(Math.random() * 10) + 1;
+        const answer = num1 + num2;
+        
+        const label = document.getElementById(`${prefix}-captcha-label`);
+        const input = document.getElementById(`${prefix}-captcha-input`);
+        const answerHidden = document.getElementById(`${prefix}-captcha-answer`);
+        
+        if (label && input && answerHidden) {
+            label.textContent = `¿Cuánto es ${num1} + ${num2}?`;
+            answerHidden.value = answer;
+            input.value = '';
+        }
+
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = contactForm.querySelector('button[type="submit"]');
+            
+            const btn = form.querySelector('button[type="submit"]');
+            const statusDiv = document.getElementById(`${prefix}-form-status`);
+            
+            // Validate CAPTCHA
+            const userAnswer = parseInt(input.value);
+            const expectedAnswer = parseInt(answerHidden.value);
+            
+            if (userAnswer !== expectedAnswer) {
+                if (statusDiv) {
+                    statusDiv.textContent = 'La respuesta de seguridad es incorrecta. Inténtalo de nuevo.';
+                    statusDiv.style.color = '#dc3545';
+                }
+                return;
+            }
+            
+            // Get form values
+            const nombre = document.getElementById(`${prefix}-nombre`).value;
+            const email = document.getElementById(`${prefix}-email`).value;
+            const mensaje = document.getElementById(`${prefix}-mensaje`).value;
+            
             const originalText = btn.textContent;
-            
             btn.textContent = 'Enviando...';
+            btn.disabled = true;
             btn.style.opacity = '0.7';
+            if (statusDiv) statusDiv.textContent = '';
             
-            // Simulate network request
-            setTimeout(() => {
-                btn.textContent = 'Mensaje Enviado';
-                btn.style.backgroundColor = '#4CAF50'; // Success green
+            try {
+                // Ensure Supabase is initialized
+                if (typeof initSupabase === 'function' && typeof supabaseClient === 'undefined') {
+                    initSupabase();
+                }
+
+                if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                    const { error } = await supabaseClient
+                        .from('mensajes')
+                        .insert([{
+                            nombre: nombre,
+                            email: email,
+                            mensaje: mensaje,
+                            asunto: 'Mensaje desde formulario web'
+                        }]);
+
+                    if (error) throw error;
+
+                    btn.textContent = 'Mensaje Enviado';
+                    btn.style.backgroundColor = '#4CAF50'; // Success green
+                    btn.style.opacity = '1';
+                    
+                    if (statusDiv) {
+                        statusDiv.textContent = '¡Gracias! Hemos recibido tu mensaje y te contactaremos pronto.';
+                        statusDiv.style.color = '#4CAF50';
+                    }
+                    
+                    form.reset();
+                    
+                    // Regenerate CAPTCHA
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                        btn.style.backgroundColor = '';
+                        btn.disabled = false;
+                        if (statusDiv) statusDiv.textContent = '';
+                        setupContactForm(formId, prefix); // re-init captcha
+                    }, 4000);
+                } else {
+                    throw new Error('Servicio de base de datos no disponible');
+                }
+            } catch (error) {
+                console.error('Error enviando mensaje:', error);
+                btn.textContent = originalText;
                 btn.style.opacity = '1';
-                contactForm.reset();
-                
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                    btn.style.backgroundColor = 'var(--color-purple)';
-                }, 3000);
-            }, 1500);
+                btn.disabled = false;
+                if (statusDiv) {
+                    statusDiv.textContent = 'Hubo un error al enviar el mensaje. Por favor, intenta usar nuestros datos de contacto directo.';
+                    statusDiv.style.color = '#dc3545';
+                }
+            }
         });
     }
+
+    setupContactForm('contact-form', 'index');
+    setupContactForm('contact-page-form', 'contacto');
+
     // Form submission dummy handler for Academy
     const academyForm = document.getElementById('academy-form');
     if (academyForm) {
@@ -185,30 +265,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Contact form submission dummy handler
-    const contactPageForm = document.getElementById('contact-page-form');
-    if (contactPageForm) {
-        contactPageForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const btn = contactPageForm.querySelector('button[type="submit"]');
-            const originalText = btn.textContent;
-            
-            btn.textContent = 'Enviando...';
-            btn.style.opacity = '0.7';
-            
-            setTimeout(() => {
-                btn.textContent = 'Mensaje Enviado';
-                btn.style.backgroundColor = '#4CAF50';
-                btn.style.opacity = '1';
-                contactPageForm.reset();
-                
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                    btn.style.backgroundColor = 'var(--color-purple)';
-                }, 3000);
-            }, 1500);
-        });
-    }
 
     // --- Dynamic Data Fetching (Servicios & Lookbook) ---
     const serviciosContainer = document.getElementById('servicios-container');

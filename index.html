@@ -179,21 +179,29 @@
                     <form id="contact-form" class="contact-form">
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="nombre">Nombre</label>
-                                <input type="text" id="nombre" name="nombre" required placeholder="Tu nombre completo">
+                                <label for="index-nombre">Nombre</label>
+                                <input type="text" id="index-nombre" required placeholder="Tu nombre completo">
                             </div>
                             <div class="form-group">
-                                <label for="email">Email</label>
-                                <input type="email" id="email" name="email" required placeholder="tu@email.com">
+                                <label for="index-email">Email</label>
+                                <input type="email" id="index-email" required placeholder="tu@email.com">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="mensaje">Mensaje</label>
-                            <textarea id="mensaje" name="mensaje" rows="5" required placeholder="¿En qué te podemos ayudar?"></textarea>
+                            <label for="index-mensaje">Mensaje</label>
+                            <textarea id="index-mensaje" rows="5" required placeholder="¿En qué te podemos ayudar?"></textarea>
                         </div>
+                        
+                        <div class="captcha-container" style="margin-bottom: 1rem; display: flex; align-items: center; gap: 10px;">
+                            <label id="index-captcha-label" style="color: var(--text-light); font-size: 0.9rem;">¿Cuánto es 5 + 3?</label>
+                            <input type="number" id="index-captcha-input" required class="form-input-light" style="width: 80px; padding: 0.5rem; border: 1px solid var(--border-color); background: rgba(255,255,255,0.05); color: white; border-radius: 4px;" placeholder="?">
+                            <input type="hidden" id="index-captcha-answer" value="8">
+                        </div>
+
                         <div class="form-submit">
                             <button type="submit" class="btn btn-primary">Enviar Mensaje</button>
                         </div>
+                        <div id="index-form-status" style="margin-top: 1rem; font-size: 0.9rem; text-align: center;"></div>
                     </form>
                 </div>
             </div>
