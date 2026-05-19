@@ -153,6 +153,14 @@ const BookingModule = {
 
         document.getElementById('booking-modal-overlay')?.classList.add('active');
         document.body.style.overflow = 'hidden';
+
+        // Clear hash and query params from URL so reloading doesn't auto-open it again
+        if (window.history.replaceState) {
+            const url = new URL(window.location.href);
+            url.searchParams.delete('reserva');
+            url.hash = '';
+            window.history.replaceState({}, document.title, url.pathname + url.search);
+        }
     },
 
     close() {
