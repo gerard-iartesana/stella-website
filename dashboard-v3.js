@@ -40,6 +40,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof MensajesModule !== 'undefined') MensajesModule.init();
     if (typeof CitasModule !== 'undefined') CitasModule.init(appData.servicios);
 
+    // Init Soporte module
+    if (typeof SoporteModule !== 'undefined') {
+        SoporteModule.init();
+        // Botón "Nueva Incidencia"
+        const addSoporteBtn = document.getElementById('add-soporte-btn');
+        if (addSoporteBtn) addSoporteBtn.addEventListener('click', () => SoporteModule.openModal());
+        // Cerrar modal soporte
+        const closeSoporteModal = document.getElementById('close-soporte-modal');
+        if (closeSoporteModal) closeSoporteModal.addEventListener('click', () => SoporteModule.closeModal());
+        const soporteOverlay = document.getElementById('soporte-modal-overlay');
+        if (soporteOverlay) soporteOverlay.addEventListener('click', (e) => { if (e.target === soporteOverlay) SoporteModule.closeModal(); });
+    }
+
     // Init Upload Zones
     if (typeof UploadModule !== 'undefined') {
         UploadModule.setupZone('servicio-upload-zone', 'servicio-file-input', 'servicio-previews', 'servicio-upload-progress', 'servicio-progress-fill', 'servicio-progress-text', { multiple: true, folder: 'servicios' });

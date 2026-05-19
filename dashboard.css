@@ -1025,3 +1025,230 @@ select {
     justify-content: center;
     line-height: 1;
 }
+
+/* ============================================
+   SOPORTE — INCIDENCIAS
+   ============================================ */
+
+/* Config warning card */
+.soporte-config-warning {
+    margin-bottom: 2rem;
+}
+
+.config-warning-card {
+    background: rgba(240, 173, 78, 0.06);
+    border: 1px solid rgba(240, 173, 78, 0.2);
+    border-radius: 10px;
+    padding: 2rem 2.5rem;
+    text-align: center;
+}
+
+.config-warning-icon {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: 0.75rem;
+}
+
+.config-warning-card h3 {
+    color: var(--warning);
+    font-family: 'Noto Serif', serif;
+    font-weight: 500;
+    margin-bottom: 0.75rem;
+}
+
+.config-warning-card p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+}
+
+.config-warning-card code {
+    background: rgba(212, 175, 55, 0.12);
+    color: var(--gold);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+.config-warning-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+}
+
+.config-warning-card ul li {
+    padding: 0.4rem 0;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.config-warning-card ul li::before {
+    content: '→ ';
+    color: var(--warning);
+}
+
+/* Soporte card */
+.soporte-card {
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.25rem 1.5rem;
+    transition: border-color 0.2s, transform 0.15s;
+}
+
+.soporte-card:hover {
+    transform: translateY(-1px);
+    border-color: rgba(212, 175, 55, 0.25);
+}
+
+.soporte-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.soporte-card-meta {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.soporte-codigo {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    opacity: 0.6;
+    font-family: monospace;
+    letter-spacing: 0.5px;
+}
+
+/* Status badges */
+.soporte-badge-estado {
+    font-size: 0.65rem;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.estado-abierta {
+    background: rgba(240, 173, 78, 0.15);
+    color: var(--warning);
+}
+
+.estado-en_curso {
+    background: rgba(91, 192, 222, 0.15);
+    color: var(--info);
+}
+
+.estado-esperando_cliente {
+    background: rgba(212, 175, 55, 0.12);
+    color: var(--gold);
+}
+
+.estado-resuelta {
+    background: rgba(40, 167, 69, 0.15);
+    color: var(--success);
+}
+
+.estado-cerrada {
+    background: rgba(160, 160, 160, 0.12);
+    color: var(--text-muted);
+}
+
+.estado-descartada {
+    background: rgba(220, 53, 69, 0.1);
+    color: var(--danger);
+    opacity: 0.7;
+}
+
+/* Priority badges */
+.soporte-badge-prioridad {
+    font-size: 0.6rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.prioridad-baja {
+    background: rgba(160, 160, 160, 0.1);
+    color: var(--text-muted);
+}
+
+.prioridad-media {
+    background: rgba(91, 192, 222, 0.1);
+    color: var(--info);
+}
+
+.prioridad-alta {
+    background: rgba(240, 173, 78, 0.15);
+    color: var(--warning);
+}
+
+.prioridad-critica {
+    background: rgba(220, 53, 69, 0.15);
+    color: var(--danger);
+    animation: criticalPulse 2s ease-in-out infinite;
+}
+
+@keyframes criticalPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* Type badge */
+.soporte-badge-tipo {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    opacity: 0.8;
+}
+
+/* Card footer */
+.soporte-card-footer {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+    width: 100%;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.soporte-fecha {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    opacity: 0.7;
+}
+
+.soporte-resolucion {
+    font-size: 0.75rem;
+    color: var(--success);
+    opacity: 0.8;
+}
+
+.soporte-respuesta {
+    font-size: 0.75rem;
+    color: var(--info);
+    cursor: help;
+}
+
+/* Soporte card in resolved/closed state */
+.soporte-card.resuelta,
+.soporte-card.cerrada {
+    opacity: 0.7;
+    border-left: 3px solid var(--success);
+}
+
+.soporte-card.resuelta:hover,
+.soporte-card.cerrada:hover {
+    opacity: 1;
+}
+
+.soporte-card.descartada {
+    opacity: 0.5;
+    border-left: 3px solid var(--danger);
+}
+
