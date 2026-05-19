@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const lookbookForm = document.getElementById('lookbook-form');
     const addServicioBtn = document.getElementById('add-servicio-btn');
     const addLookbookBtn = document.getElementById('add-lookbook-btn');
-    const saveAllBtn = document.getElementById('save-all-btn');
+
     const saveStatus = document.getElementById('save-status');
 
     // Custom Confirm Modal
@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
             saveStatus.classList.add('status-error');
         }
     }
-    saveAllBtn.addEventListener('click', saveData);
+
 
     // --- Modal Logic ---
     function openModal(modalId) {
