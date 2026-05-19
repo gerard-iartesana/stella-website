@@ -32,9 +32,13 @@ const BookingModule = {
     async init() {
         this.bindEvents();
         await this.loadServices();
-        // Auto-open if URL has #reservar
-        if (window.location.hash === '#reservar') {
-            this.open();
+        
+        // Auto-open if URL has #reservar or 'reserva' param
+        const params = new URLSearchParams(window.location.search);
+        const serviceId = params.get('reserva');
+        
+        if (window.location.hash === '#reservar' || serviceId) {
+            this.open(serviceId);
         }
     },
 
@@ -73,9 +77,18 @@ const BookingModule = {
         document.body.addEventListener('click', (e) => {
             const btn = e.target.closest('.btn-open-booking');
             if (btn) {
-                e.preventDefault();
                 const serviceId = btn.dataset.servicioId;
-                this.open(serviceId);
+                
+                // Si el modal está en esta página, abrirlo directamente
+                if (document.getElementById('booking-modal-overlay')) {
+                    e.preventDefault();
+                    this.open(serviceId);
+                } else if (serviceId) {
+                    // Si el modal no está, redirigir a contacto.html con el parámetro
+                    e.preventDefault();
+                    window.location.href = `contacto.html?reserva=${serviceId}#reservar`;
+                }
+                // Si no hay serviceId ni modal, dejamos que el <a> funcione normal
             }
         });
     },
