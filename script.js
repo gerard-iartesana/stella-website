@@ -215,7 +215,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const lookbookGrid = document.getElementById('gallery-grid');
     
     if (serviciosContainer || lookbookGrid) {
-        if (typeof supabase !== 'undefined' && typeof supabaseClient !== 'undefined') {
+        if (typeof initSupabase === 'function') initSupabase(); // Inicializar Supabase
+
+        if (typeof supabase !== 'undefined' && typeof supabaseClient !== 'undefined' && supabaseClient) {
             // Fetch from Supabase
             Promise.all([
                 supabaseClient.from('servicios').select('*').order('orden', { ascending: true }),
