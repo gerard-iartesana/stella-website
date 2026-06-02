@@ -464,21 +464,17 @@ document.addEventListener('DOMContentLoaded', () => {
             };
             
             if (lightboxClose) {
-                const newClose = lightboxClose.cloneNode(true);
-                lightboxClose.parentNode.replaceChild(newClose, lightboxClose);
-                newClose.addEventListener('click', (e) => {
+                lightboxClose.onclick = (e) => {
                     e.stopPropagation();
                     closeLightbox();
-                });
+                };
             }
             
-            const newLightbox = lightbox.cloneNode(true);
-            lightbox.parentNode.replaceChild(newLightbox, lightbox);
-            newLightbox.addEventListener('click', (e) => {
-                if (e.target === newLightbox || e.target.classList.contains('lightbox-close')) {
+            lightbox.onclick = (e) => {
+                if (e.target === lightbox || e.target.classList.contains('lightbox-close')) {
                     closeLightbox();
                 }
-            });
+            };
         }
     }
 
