@@ -279,6 +279,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 supabaseClient.from('servicios').select('*').order('orden', { ascending: true }),
                 supabaseClient.from('lookbook').select('*').order('orden', { ascending: true })
             ]).then(([resServicios, resLookbook]) => {
+                if (resServicios.data) {
+                    window.servicesData = resServicios.data;
+                }
+                
                 if (serviciosContainer && resServicios.data && resServicios.data.length > 0) {
                     renderServicios(resServicios.data);
                 } else if (serviciosContainer) {
@@ -304,6 +308,9 @@ document.addEventListener('DOMContentLoaded', () => {
         fetch(API_URL)
             .then(res => res.json())
             .then(data => {
+                if (data.servicios) {
+                    window.servicesData = data.servicios;
+                }
                 if (serviciosContainer && data.servicios) renderServicios(data.servicios);
                 if (lookbookGrid && data.lookbook) renderLookbook(data.lookbook);
             })
@@ -370,6 +377,51 @@ document.addEventListener('DOMContentLoaded', () => {
             div.className = 'gallery-item';
             div.setAttribute('data-category', item.categoria);
             div.innerHTML = `<img src="${item.imagen}" alt="${item.alt}">`;
+            
+            // Evento Click para abrir el lightbox premium
+            div.addEventListener('click', () => {
+                const lightbox = document.getElementById('lightbox');
+                const lightboxImg = document.getElementById('lightbox-img');
+                
+                if (lightbox && lightboxImg) {
+                    lightboxImg.src = item.imagen;
+                    
+                    const detailsPane = document.querySelector('.lightbox-details');
+                    const card = document.querySelector('.lightbox-card');
+                    
+                    // Buscar el servicio asociado por el título (guardado en item.servicio_id)
+                    const associatedService = window.servicesData 
+                        ? window.servicesData.find(s => s.titulo === item.servicio_id) 
+                        : null;
+                    
+                    if (associatedService && detailsPane && card) {
+                        detailsPane.style.display = 'flex';
+                        card.style.maxWidth = '960px';
+                        
+                        document.getElementById('lightbox-category').textContent = item.categoria || 'Lookbook';
+                        document.getElementById('lightbox-title').textContent = associatedService.titulo;
+                        document.getElementById('lightbox-desc').textContent = associatedService.descripcion;
+                        document.getElementById('lightbox-duration').textContent = associatedService.duracion || 'Consultar';
+                        document.getElementById('lightbox-price').textContent = associatedService.precio || 'Consultar';
+                        
+                        const cta = document.getElementById('lightbox-cta');
+                        if (cta) {
+                            cta.href = `contacto.html?reserva=${associatedService.id}#reservar`;
+                            cta.setAttribute('data-servicio-id', associatedService.id);
+                        }
+                    } else {
+                        // Fallback: ocultar panel lateral y mostrar centrado
+                        if (detailsPane && card) {
+                            detailsPane.style.display = 'none';
+                            card.style.maxWidth = '600px';
+                        }
+                    }
+                    
+                    lightbox.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                }
+            });
+            
             lookbookGrid.appendChild(div);
         });
 
@@ -397,19 +449,37 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
+        // Configuración de eventos de cerrado para el Lightbox
         const lightbox = document.getElementById('lightbox');
-        const lightboxImg = document.getElementById('lightbox-img');
+        const lightboxClose = document.querySelector('.lightbox-close');
         
-        newGalleryItems.forEach(item => {
-            item.addEventListener('click', () => {
-                const img = item.querySelector('img');
-                if (img && lightbox && lightboxImg) {
-                    lightboxImg.src = img.src;
-                    lightbox.classList.add('active');
-                    document.body.style.overflow = 'hidden';
+        if (lightbox) {
+            const closeLightbox = () => {
+                lightbox.classList.remove('active');
+                document.body.style.overflow = 'auto';
+                const lightboxImg = document.getElementById('lightbox-img');
+                if (lightboxImg) {
+                    setTimeout(() => { lightboxImg.src = ''; }, 300);
+                }
+            };
+            
+            if (lightboxClose) {
+                const newClose = lightboxClose.cloneNode(true);
+                lightboxClose.parentNode.replaceChild(newClose, lightboxClose);
+                newClose.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    closeLightbox();
+                });
+            }
+            
+            const newLightbox = lightbox.cloneNode(true);
+            lightbox.parentNode.replaceChild(newLightbox, lightbox);
+            newLightbox.addEventListener('click', (e) => {
+                if (e.target === newLightbox || e.target.classList.contains('lightbox-close')) {
+                    closeLightbox();
                 }
             });
-        });
+        }
     }
 
 });

@@ -78,91 +78,106 @@
       "id": "item1",
       "categoria": "trenzas",
       "imagen": "./imagenes/Trenzas-2.jpg",
-      "alt": "Trenzas africanas"
+      "alt": "Trenzas africanas",
+      "servicio_id": "Trenzado"
     },
     {
       "id": "item2",
       "categoria": "pelucas",
       "imagen": "./imagenes/pelucas-1.png",
-      "alt": "Peluca oncológica premium"
+      "alt": "Peluca oncológica premium",
+      "servicio_id": "Pelucas Oncológicas"
     },
     {
       "id": "item3",
       "categoria": "especiales",
       "imagen": "./imagenes/eventos-1.png",
-      "alt": "Peinado elegante evento"
+      "alt": "Peinado elegante evento",
+      "servicio_id": "Peinados para Eventos"
     },
     {
       "id": "item4",
       "categoria": "protesis",
       "imagen": "./imagenes/capilar-1.png",
-      "alt": "Sistema capilar hombres"
+      "alt": "Sistema capilar hombres",
+      "servicio_id": "Sistema Capilar para Hombres"
     },
     {
       "id": "item5",
       "categoria": "trenzas",
       "imagen": "./imagenes/Trenzas azules 3.jpg",
-      "alt": "Trenzas azules"
+      "alt": "Trenzas azules",
+      "servicio_id": "Trenzado"
     },
     {
       "id": "item6",
       "categoria": "protesis",
       "imagen": "./imagenes/capilar-2.png",
-      "alt": "Sistema capilar hombre 2"
+      "alt": "Sistema capilar hombre 2",
+      "servicio_id": "Sistema Capilar para Hombres"
     },
     {
       "id": "item7",
       "categoria": "pelucas",
       "imagen": "./imagenes/pelucas-2.png",
-      "alt": "Peluca oncológica premium"
+      "alt": "Peluca oncológica premium",
+      "servicio_id": "Pelucas Oncológicas"
     },
     {
       "id": "item8",
       "categoria": "trenzas",
       "imagen": "./imagenes/Trenzas-3.jpg",
-      "alt": "Trenzas africanas 3"
+      "alt": "Trenzas africanas 3",
+      "servicio_id": "Trenzado"
     },
     {
       "id": "item9",
       "categoria": "especiales",
       "imagen": "./imagenes/eventos-2.png",
-      "alt": "Peinado boda trenzas"
+      "alt": "Peinado boda trenzas",
+      "servicio_id": "Peinados para Eventos"
     },
     {
       "id": "item10",
       "categoria": "trenzas",
       "imagen": "./imagenes/Trenzas-7.jpg",
-      "alt": "Trenzas africanas detalle"
+      "alt": "Trenzas africanas detalle",
+      "servicio_id": "Trenzado"
     },
     {
       "id": "item11",
       "categoria": "protesis",
       "imagen": "./imagenes/capilar-3.png",
-      "alt": "Sistema capilar hombre 3"
+      "alt": "Sistema capilar hombre 3",
+      "servicio_id": "Sistema Capilar para Hombres"
     },
     {
       "id": "item12",
       "categoria": "pelucas",
       "imagen": "./imagenes/pelucas-3.png",
-      "alt": "Peluca oncológica"
+      "alt": "Peluca oncológica",
+      "servicio_id": "Pelucas Oncológicas"
     },
     {
       "id": "item13",
       "categoria": "especiales",
       "imagen": "./imagenes/eventos-3.png",
-      "alt": "Peinado evento gala"
+      "alt": "Peinado evento gala",
+      "servicio_id": "Peinados para Eventos"
     },
     {
       "id": "item14",
       "categoria": "trenzas",
       "imagen": "./imagenes/Presentacion.jpg",
-      "alt": "Trenzas presentacion"
+      "alt": "Trenzas presentacion",
+      "servicio_id": "Trenzado"
     },
     {
       "id": "item15",
       "categoria": "trenzas",
       "imagen": "./imagenes/Servicio 2.png",
-      "alt": "Servicio de trenzas"
+      "alt": "Servicio de trenzas",
+      "servicio_id": "Trenzado"
     }
   ]
 }

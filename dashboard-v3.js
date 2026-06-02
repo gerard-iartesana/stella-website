@@ -121,6 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         renderServicios();
         renderLookbook();
+        populateLookbookServicesDropdown();
         if (typeof CitasModule !== 'undefined') CitasModule.serviciosList = appData.servicios;
     }
 
@@ -284,6 +285,18 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (editBtn) { editLookbook(editBtn.dataset.index); }
     });
 
+    function populateLookbookServicesDropdown() {
+        const dropdown = document.getElementById('lookbook-servicio-id');
+        if (!dropdown) return;
+        dropdown.innerHTML = '<option value="">— Ninguno / Consulta General —</option>';
+        appData.servicios.forEach(s => {
+            const option = document.createElement('option');
+            option.value = s.titulo;
+            option.textContent = s.titulo;
+            dropdown.appendChild(option);
+        });
+    }
+
     function renderLookbook() {
         lookbookList.innerHTML = '';
         const reversed = [...appData.lookbook].reverse();
@@ -295,6 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <img src="${item.imagen}" alt="${item.alt}">
                 <div class="grid-item-info">
                     <p><strong>Cat:</strong> ${item.categoria}</p>
+                    <p><strong>Servicio:</strong> ${item.servicio_id || 'Ninguno'}</p>
                     <p><strong>Alt:</strong> ${item.alt || '-'}</p>
                 </div>
                 <div class="item-actions" style="display: flex; gap: 0.5rem;">
@@ -319,6 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('lookbook-imagen').value = item.imagen;
         document.getElementById('lookbook-categoria').value = item.categoria;
         document.getElementById('lookbook-alt').value = item.alt;
+        document.getElementById('lookbook-servicio-id').value = item.servicio_id || '';
         if (typeof UploadModule !== 'undefined') UploadModule.setUrls('lookbook-upload-zone', 'lookbook-previews', item.imagen ? [item.imagen] : []);
         document.getElementById('lookbook-modal-title').textContent = 'Editar Imagen Lookbook';
         openModal('lookbook-modal');
@@ -333,7 +348,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 ? UploadModule.getUrls('lookbook-upload-zone')[0]
                 : document.getElementById('lookbook-imagen').value,
             categoria: document.getElementById('lookbook-categoria').value,
-            alt: document.getElementById('lookbook-alt').value
+            alt: document.getElementById('lookbook-alt').value,
+            servicio_id: document.getElementById('lookbook-servicio-id').value
         };
         if (id === '') { appData.lookbook.push(newItem); }
         else { appData.lookbook[id] = newItem; }

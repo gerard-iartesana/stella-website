@@ -95,7 +95,22 @@
         <!-- Lightbox Modal -->
         <div id="lightbox" class="lightbox">
             <span class="lightbox-close">&times;</span>
-            <img class="lightbox-content" id="lightbox-img" alt="Vista ampliada">
+            <div class="lightbox-card">
+                <div class="lightbox-img-wrapper">
+                    <img id="lightbox-img" src="" alt="Vista ampliada">
+                </div>
+                <div class="lightbox-details">
+                    <div class="gold-line"></div>
+                    <span class="lightbox-category" id="lightbox-category">Categoría</span>
+                    <h2 class="lightbox-title" id="lightbox-title">Título del Servicio</h2>
+                    <p class="lightbox-desc" id="lightbox-desc">Descripción...</p>
+                    <div class="lightbox-meta" id="lightbox-meta">
+                        <p><strong>Duración:</strong> <span id="lightbox-duration"></span></p>
+                        <p><strong>Precio:</strong> <span id="lightbox-price"></span></p>
+                    </div>
+                    <a href="#" id="lightbox-cta" class="btn btn-primary mt-3 btn-open-booking">Reservar este servicio</a>
+                </div>
+            </div>
         </div>
 
     </main>
