@@ -2,6 +2,21 @@
 // Mensajes & Citas Module — Roots CMS
 // ============================================
 
+// Helpers de fecha en zona horaria local
+function formatDateLocal(date) {
+    if (!date) return '';
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+function parseDateLocal(dateStr) {
+    if (!dateStr) return new Date();
+    const parts = dateStr.split('-');
+    return new Date(parts[0], parts[1] - 1, parts[2]);
+}
+
 const MensajesModule = {
     mensajes: [],
     currentMsgIndex: null,
@@ -222,7 +237,7 @@ const CitasModule = {
     loadDemoData() {
         if (isSupabaseConfigured && isSupabaseConfigured()) return this.loadFromSupabase();
         const today = new Date();
-        const d = (offset) => { const dt = new Date(today); dt.setDate(dt.getDate() + offset); return dt.toISOString().split('T')[0]; };
+        const d = (offset) => { const dt = new Date(today); dt.setDate(dt.getDate() + offset); return formatDateLocal(dt); };
         this.citas = [
             { id: '1', nombre_cliente: 'María García', servicio: 'Box Braids', fecha: d(0), hora_inicio: '10:00', hora_fin: '13:00', estado: 'confirmada', notas: 'Primera visita', email: '', telefono: '612345678' },
             { id: '2', nombre_cliente: 'Ana López', servicio: 'Cornrows', fecha: d(1), hora_inicio: '09:30', hora_fin: '11:00', estado: 'pendiente', notas: '', email: 'ana@email.com', telefono: '' },
@@ -281,7 +296,7 @@ const CitasModule = {
         const startDate = new Date(firstDay);
         startDate.setDate(startDate.getDate() - startOffset);
 
-        const todayStr = new Date().toISOString().split('T')[0];
+        const todayStr = formatDateLocal(new Date());
 
         // Rellenar 35 o 42 días
         const totalDays = startOffset + lastDay.getDate() > 35 ? 42 : 35;
@@ -289,7 +304,7 @@ const CitasModule = {
         for (let i = 0; i < totalDays; i++) {
             const date = new Date(startDate);
             date.setDate(date.getDate() + i);
-            const dateStr = date.toISOString().split('T')[0];
+            const dateStr = formatDateLocal(date);
             const isToday = dateStr === todayStr;
             const isOtherMonth = date.getMonth() !== month;
             const dayCitas = this.citas.filter(c => c.fecha === dateStr).sort((a, b) => a.hora_inicio.localeCompare(b.hora_inicio));
@@ -304,7 +319,7 @@ const CitasModule = {
 
         grid.querySelectorAll('.cal-day').forEach(day => {
             day.addEventListener('click', () => {
-                this.currentDate = new Date(day.dataset.date);
+                this.currentDate = parseDateLocal(day.dataset.date);
                 this.currentView = 'dia';
                 document.getElementById('view-mode-month').classList.remove('active');
                 document.getElementById('view-mode-day').classList.add('active');
@@ -315,7 +330,7 @@ const CitasModule = {
 
     renderWeekView(grid) {
         const days = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
-        const today = new Date().toISOString().split('T')[0];
+        const today = formatDateLocal(new Date());
         const ws = this.getMonday(new Date(this.currentDate));
 
         // Update title
@@ -328,7 +343,7 @@ const CitasModule = {
         for (let i = 0; i < 7; i++) {
             const date = new Date(ws);
             date.setDate(date.getDate() + i);
-            const dateStr = date.toISOString().split('T')[0];
+            const dateStr = formatDateLocal(date);
             const isToday = dateStr === today;
             const dayCitas = this.citas.filter(c => c.fecha === dateStr).sort((a, b) => a.hora_inicio.localeCompare(b.hora_inicio));
 
@@ -346,7 +361,7 @@ const CitasModule = {
     },
 
     renderDayView(grid) {
-        const dateStr = this.currentDate.toISOString().split('T')[0];
+        const dateStr = formatDateLocal(this.currentDate);
         const title = document.getElementById('cal-current-week');
         if (title) title.textContent = this.currentDate.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -378,7 +393,7 @@ const CitasModule = {
         const title = document.getElementById('detail-day-title');
         const dayCitas = this.citas.filter(c => c.fecha === dateStr).sort((a, b) => a.hora_inicio.localeCompare(b.hora_inicio));
 
-        title.textContent = `Citas del ${new Date(dateStr + 'T00:00:00').toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}`;
+        title.textContent = `Citas del ${parseDateLocal(dateStr).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}`;
 
         if (dayCitas.length === 0) {
             list.innerHTML = '<div class="empty-state" style="padding:2rem;"><p>Sin citas este día</p></div>';
@@ -433,7 +448,7 @@ const CitasModule = {
             this.currentCitaId = null;
             document.getElementById('cita-modal-title').textContent = 'Nueva Cita';
             document.getElementById('cita-id').value = '';
-            document.getElementById('cita-fecha').value = new Date().toISOString().split('T')[0];
+            document.getElementById('cita-fecha').value = formatDateLocal(new Date());
             deleteBtn.style.display = 'none';
             document.getElementById('cita-foto-container').style.display = 'none';
         }
