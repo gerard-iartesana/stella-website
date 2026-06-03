@@ -183,13 +183,22 @@ const MensajesModule = {
 const CitasModule = {
     citas: [],
     currentDate: null,
-    currentView: 'semana', // 'mes', 'semana', 'dia'
+    currentView: 'mes', // 'mes', 'semana', 'dia'
     currentCitaId: null,
 
     init(serviciosList) {
         this.serviciosList = serviciosList || [];
         this.currentDate = new Date();
         this.bindEvents();
+        
+        // Sincronizar botón de vista activo al inicializar
+        const viewMap = { 'mes': 'month', 'semana': 'week', 'dia': 'day' };
+        const activeBtn = document.getElementById(`view-mode-${viewMap[this.currentView]}`);
+        if (activeBtn) {
+            ['month', 'week', 'day'].forEach(v => document.getElementById(`view-mode-${v}`)?.classList.remove('active'));
+            activeBtn.classList.add('active');
+        }
+
         this.loadDemoData();
     },
 
