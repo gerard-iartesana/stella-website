@@ -614,6 +614,46 @@ body {
     text-decoration: line-through;
 }
 
+/* Day View Styles */
+.calendar-grid.day-view {
+    grid-template-columns: 1fr;
+    background: transparent;
+    border: none;
+    gap: 0.5rem;
+}
+
+.calendar-grid.day-view .cal-day-header {
+    display: none;
+}
+
+.calendar-grid.day-view .cal-day {
+    min-height: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    gap: 0.5rem;
+}
+
+.calendar-grid.day-view .cal-day .cal-day-number {
+    display: none;
+}
+
+.calendar-grid.day-view .cal-event {
+    font-size: 0.85rem;
+    padding: 0.5rem 0.75rem;
+    white-space: normal;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Month view specifics */
+.calendar-grid.month-view .cal-day {
+    min-height: 80px;
+}
+
 /* Day detail panel */
 .citas-day-detail {
     background: var(--bg-card);

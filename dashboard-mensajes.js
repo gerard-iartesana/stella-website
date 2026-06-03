@@ -167,12 +167,13 @@ const MensajesModule = {
 // ============================================
 const CitasModule = {
     citas: [],
-    currentWeekStart: null,
+    currentDate: null,
+    currentView: 'semana', // 'mes', 'semana', 'dia'
     currentCitaId: null,
 
     init(serviciosList) {
         this.serviciosList = serviciosList || [];
-        this.currentWeekStart = this.getMonday(new Date());
+        this.currentDate = new Date();
         this.bindEvents();
         this.loadDemoData();
     },
@@ -180,9 +181,36 @@ const CitasModule = {
     getMonday(d) { const day = d.getDay(); const diff = d.getDate() - day + (day === 0 ? -6 : 1); return new Date(d.setDate(diff)); },
 
     bindEvents() {
-        document.getElementById('cal-prev')?.addEventListener('click', () => { this.currentWeekStart.setDate(this.currentWeekStart.getDate() - 7); this.renderCalendar(); });
-        document.getElementById('cal-next')?.addEventListener('click', () => { this.currentWeekStart.setDate(this.currentWeekStart.getDate() + 7); this.renderCalendar(); });
-        document.getElementById('cal-today')?.addEventListener('click', () => { this.currentWeekStart = this.getMonday(new Date()); this.renderCalendar(); });
+        document.getElementById('cal-prev')?.addEventListener('click', () => { 
+            if (this.currentView === 'mes') this.currentDate.setMonth(this.currentDate.getMonth() - 1);
+            else if (this.currentView === 'semana') this.currentDate.setDate(this.currentDate.getDate() - 7);
+            else if (this.currentView === 'dia') this.currentDate.setDate(this.currentDate.getDate() - 1);
+            this.renderCalendar(); 
+        });
+        document.getElementById('cal-next')?.addEventListener('click', () => { 
+            if (this.currentView === 'mes') this.currentDate.setMonth(this.currentDate.getMonth() + 1);
+            else if (this.currentView === 'semana') this.currentDate.setDate(this.currentDate.getDate() + 7);
+            else if (this.currentView === 'dia') this.currentDate.setDate(this.currentDate.getDate() + 1);
+            this.renderCalendar(); 
+        });
+        document.getElementById('cal-today')?.addEventListener('click', () => { 
+            this.currentDate = new Date(); 
+            this.renderCalendar(); 
+        });
+
+        // View Toggles
+        const viewBtns = ['month', 'week', 'day'];
+        viewBtns.forEach(view => {
+            document.getElementById(`view-mode-${view}`)?.addEventListener('click', (e) => {
+                viewBtns.forEach(v => document.getElementById(`view-mode-${v}`)?.classList.remove('active'));
+                e.target.classList.add('active');
+                if (view === 'month') this.currentView = 'mes';
+                else if (view === 'week') this.currentView = 'semana';
+                else if (view === 'day') this.currentView = 'dia';
+                this.renderCalendar();
+            });
+        });
+
         document.getElementById('add-cita-btn')?.addEventListener('click', () => this.openCitaModal());
         document.getElementById('close-cita-modal')?.addEventListener('click', () => this.closeCitaModal());
         document.getElementById('cita-modal-overlay')?.addEventListener('click', (e) => { if (e.target.id === 'cita-modal-overlay') this.closeCitaModal(); });
@@ -221,14 +249,79 @@ const CitasModule = {
     renderCalendar() {
         const grid = document.getElementById('calendar-grid');
         if (!grid) return;
+        
+        // Remove old classes
+        grid.classList.remove('month-view', 'day-view', 'week-view');
+
+        if (this.currentView === 'mes') {
+            grid.classList.add('month-view');
+            this.renderMonthView(grid);
+        } else if (this.currentView === 'semana') {
+            grid.classList.add('week-view');
+            this.renderWeekView(grid);
+        } else if (this.currentView === 'dia') {
+            grid.classList.add('day-view');
+            this.renderDayView(grid);
+        }
+    },
+
+    renderMonthView(grid) {
+        const days = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+        const year = this.currentDate.getFullYear();
+        const month = this.currentDate.getMonth();
+        const title = document.getElementById('cal-current-week');
+        if (title) title.textContent = new Date(year, month, 1).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+
+        let html = days.map(d => `<div class="cal-day-header">${d}</div>`).join('');
+
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        let startOffset = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1; // Lunes = 0
+
+        const startDate = new Date(firstDay);
+        startDate.setDate(startDate.getDate() - startOffset);
+
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        // Rellenar 35 o 42 días
+        const totalDays = startOffset + lastDay.getDate() > 35 ? 42 : 35;
+
+        for (let i = 0; i < totalDays; i++) {
+            const date = new Date(startDate);
+            date.setDate(date.getDate() + i);
+            const dateStr = date.toISOString().split('T')[0];
+            const isToday = dateStr === todayStr;
+            const isOtherMonth = date.getMonth() !== month;
+            const dayCitas = this.citas.filter(c => c.fecha === dateStr).sort((a, b) => a.hora_inicio.localeCompare(b.hora_inicio));
+
+            html += `<div class="cal-day ${isToday ? 'today' : ''} ${isOtherMonth ? 'other-month' : ''}" data-date="${dateStr}">
+                <div class="cal-day-number">${date.getDate()}</div>
+                ${dayCitas.slice(0, 2).map(c => `<div class="cal-event ${c.estado}" title="${c.nombre_cliente}">${c.hora_inicio} ${c.nombre_cliente}</div>`).join('')}
+                ${dayCitas.length > 2 ? `<div style="font-size:0.7rem;color:var(--text-muted);text-align:center;">+${dayCitas.length - 2}</div>` : ''}
+            </div>`;
+        }
+        grid.innerHTML = html;
+
+        grid.querySelectorAll('.cal-day').forEach(day => {
+            day.addEventListener('click', () => {
+                this.currentDate = new Date(day.dataset.date);
+                this.currentView = 'dia';
+                document.getElementById('view-mode-month').classList.remove('active');
+                document.getElementById('view-mode-day').classList.add('active');
+                this.renderCalendar();
+            });
+        });
+    },
+
+    renderWeekView(grid) {
         const days = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
         const today = new Date().toISOString().split('T')[0];
-        const ws = new Date(this.currentWeekStart);
+        const ws = this.getMonday(new Date(this.currentDate));
 
         // Update title
         const endWeek = new Date(ws); endWeek.setDate(endWeek.getDate() + 6);
         const title = document.getElementById('cal-current-week');
-        if (title) title.textContent = `${ws.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })} — ${endWeek.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+        if (title) title.textContent = `${ws.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })} — ${endWeek.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}`;
 
         let html = days.map(d => `<div class="cal-day-header">${d}</div>`).join('');
 
@@ -237,7 +330,7 @@ const CitasModule = {
             date.setDate(date.getDate() + i);
             const dateStr = date.toISOString().split('T')[0];
             const isToday = dateStr === today;
-            const dayCitas = this.citas.filter(c => c.fecha === dateStr);
+            const dayCitas = this.citas.filter(c => c.fecha === dateStr).sort((a, b) => a.hora_inicio.localeCompare(b.hora_inicio));
 
             html += `<div class="cal-day ${isToday ? 'today' : ''}" data-date="${dateStr}">
                 <div class="cal-day-number">${date.getDate()}</div>
@@ -249,6 +342,33 @@ const CitasModule = {
 
         grid.querySelectorAll('.cal-day').forEach(day => {
             day.addEventListener('click', () => this.showDayDetail(day.dataset.date));
+        });
+    },
+
+    renderDayView(grid) {
+        const dateStr = this.currentDate.toISOString().split('T')[0];
+        const title = document.getElementById('cal-current-week');
+        if (title) title.textContent = this.currentDate.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+        const dayCitas = this.citas.filter(c => c.fecha === dateStr).sort((a, b) => a.hora_inicio.localeCompare(b.hora_inicio));
+
+        if (dayCitas.length === 0) {
+            grid.innerHTML = `<div class="cal-day" style="text-align: center; color: var(--text-muted); padding: 3rem;">No hay citas para este día.</div>`;
+            return;
+        }
+
+        let html = `<div class="cal-day">`;
+        dayCitas.forEach(c => {
+            html += `<div class="cal-event ${c.estado}" data-id="${c.id}">
+                <div><strong>${c.hora_inicio}${c.hora_fin ? ' - ' + c.hora_fin : ''}</strong> &nbsp;|&nbsp; ${c.nombre_cliente} &nbsp; <span style="opacity:0.7;">(${c.servicio || 'Sin servicio'})</span></div>
+                <span class="cita-status ${c.estado}">${c.estado}</span>
+            </div>`;
+        });
+        html += `</div>`;
+        grid.innerHTML = html;
+
+        grid.querySelectorAll('.cal-event').forEach(el => {
+            el.addEventListener('click', () => this.openCitaModal(el.dataset.id));
         });
     },
 
