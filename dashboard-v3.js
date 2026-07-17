@@ -104,6 +104,12 @@ document.addEventListener('DOMContentLoaded', () => {
             hidePrompt();
         }
     });
+    promptInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            promptOkBtn.click();
+        }
+    });
     promptCancelBtn.addEventListener('click', hidePrompt);
     promptCancelX.addEventListener('click', hidePrompt);
     promptOverlay.addEventListener('click', (e) => { if (e.target === promptOverlay) hidePrompt(); });
