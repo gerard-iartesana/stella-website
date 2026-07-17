@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- State ---
     let appData = { servicios: [], lookbook: [], categorias: [] };
     let activeCategoryName = 'Todas';
+    let hasCategoriasTable = true;
 
     // --- Init Supabase ---
     if (typeof initSupabase === 'function') initSupabase();
@@ -131,7 +132,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 let cData = [];
                 try {
                     const { data, error } = await supabaseClient.from('categorias').select('*').order('orden', { ascending: true });
-                    if (!error) cData = data || [];
+                    if (!error) {
+                        cData = data || [];
+                        hasCategoriasTable = true;
+                    } else {
+                        console.warn('Categorias table missing or query error:', error.message);
+                        if (error.status === 404 || error.code === 'PGRST116' || (error.message && error.message.includes('does not exist'))) {
+                            hasCategoriasTable = false;
+                        }
+                    }
                 } catch (e) {
                     console.warn('Categorias table fetch error, using fallback:', e);
                 }
@@ -307,6 +316,27 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!categoriesList) return;
         categoriesList.innerHTML = '';
 
+        if (!hasCategoriasTable) {
+            const warnLi = document.createElement('li');
+            warnLi.style.padding = '0.75rem';
+            warnLi.style.background = 'rgba(220, 53, 69, 0.1)';
+            warnLi.style.border = '1px solid #dc3545';
+            warnLi.style.borderRadius = '6px';
+            warnLi.style.color = '#dc3545';
+            warnLi.style.fontSize = '0.8rem';
+            warnLi.style.marginBottom = '1rem';
+            warnLi.style.textAlign = 'center';
+            warnLi.innerHTML = '⚠️ Categorías no configuradas en Supabase.<br><a href="#" id="view-sql-instructions" style="color: var(--gold); text-decoration: underline; display: block; margin-top: 0.25rem; font-weight: 500;">Ver instrucciones SQL</a>';
+            categoriesList.appendChild(warnLi);
+            
+            setTimeout(() => {
+                document.getElementById('view-sql-instructions')?.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    alert('Para activar las categorías, abre el SQL Editor en Supabase y ejecuta el código del archivo "migrations/add_categorias_grouping.sql".');
+                });
+            }, 100);
+        }
+
         // Botón "Todas"
         const countAll = appData.servicios.length;
         const allLi = document.createElement('li');
@@ -360,6 +390,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.stopPropagation();
                 const index = parseInt(btn.dataset.index);
                 const cat = appData.categorias[index];
+                if (!hasCategoriasTable) {
+                    alert('⚠️ No se puede editar la categoría porque la tabla "categorias" no existe en Supabase.');
+                    return;
+                }
                 showPrompt('Editar Categoría', cat.nombre, (newName) => {
                     if (newName && newName !== cat.nombre) {
                         // Comprobar si ya existe una con ese nombre
@@ -387,6 +421,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.stopPropagation();
                 const index = parseInt(btn.dataset.index);
                 const cat = appData.categorias[index];
+                if (!hasCategoriasTable) {
+                    alert('⚠️ No se puede eliminar la categoría porque la tabla "categorias" no existe en Supabase.');
+                    return;
+                }
                 showConfirm(`¿Estás seguro de eliminar la categoría "${cat.nombre}"? Esto también eliminará todos los servicios que pertenecen a ella.`, () => {
                     const deletedName = cat.nombre;
                     // Eliminar servicios
@@ -408,6 +446,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const addCategoriaBtn = document.getElementById('add-categoria-btn');
     if (addCategoriaBtn) {
         addCategoriaBtn.addEventListener('click', () => {
+            if (!hasCategoriasTable) {
+                alert('⚠️ No se puede crear la categoría en Supabase porque la tabla "categorias" no existe.\n\nPor favor, ejecuta la consulta SQL en el panel de Supabase SQL Editor para habilitarla.');
+                return;
+            }
             showPrompt('Nueva Categoría', '', (name) => {
                 if (name) {
                     // Comprobar si ya existe
