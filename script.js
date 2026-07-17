@@ -322,39 +322,70 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderServicios(servicios) {
         serviciosContainer.innerHTML = '';
-        servicios.forEach(servicio => {
-            let accordionHtml = '';
-            servicio.imagenes.forEach((img, i) => {
-                accordionHtml += `<div class="accordion-panel ${i === 0 ? 'active' : ''}" style="background-image: url('${img}');" aria-label="${servicio.titulo} ${i+1}"></div>`;
-            });
+        
+        // Agrupar dinámicamente por categoría
+        const uniqueCategories = [...new Set(servicios.map(s => s.categoria || 'General'))];
+        
+        uniqueCategories.forEach(catName => {
+            const catServicios = servicios.filter(s => (s.categoria || 'General') === catName);
+            if (catServicios.length === 0) return;
 
-            let incluyeHtml = '';
-            servicio.incluye.forEach(item => {
-                incluyeHtml += `<li><span class="check-icon">✓</span> ${item}</li>`;
-            });
-
-            const row = document.createElement('div');
-            row.className = 'service-row';
-            row.innerHTML = `
-                <div class="service-img-col image-accordion">
-                    ${accordionHtml}
+            // Crear sección de la categoría
+            const catSection = document.createElement('div');
+            catSection.className = 'category-section';
+            catSection.style.marginBottom = '4rem';
+            catSection.innerHTML = `
+                <div class="category-header text-center" style="margin-bottom: 3rem; margin-top: 2rem;">
+                    <div class="gold-line center"></div>
+                    <h2 class="category-title" style="font-family: var(--font-heading); font-size: 2.2rem; font-weight: 500; color: var(--color-black); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">${catName}</h2>
                 </div>
-                <div class="service-text-col">
-                    <div class="gold-line"></div>
-                    <h2 class="section-title">${servicio.titulo}</h2>
-                    <p class="service-desc">${servicio.descripcion}</p>
-                    <h4 class="includes-title">Incluye:</h4>
-                    <ul class="check-list">
-                        ${incluyeHtml}
-                    </ul>
-                    <div class="service-meta">
-                        <p><strong>Duración:</strong> <span class="meta-value">${servicio.duracion}</span></p>
-                        <p><strong>Precio:</strong> <span class="meta-value">${servicio.precio}</span></p>
-                    </div>
-                    <a href="contacto.html#reservar" class="btn btn-primary mt-3 btn-open-booking" data-servicio-id="${servicio.id}">Reservar este Servicio</a>
+                <div class="category-services-list">
+                    <!-- Servicios se inyectan aquí -->
                 </div>
             `;
-            serviciosContainer.appendChild(row);
+
+            const servicesListDiv = catSection.querySelector('.category-services-list');
+
+            catServicios.forEach(servicio => {
+                let accordionHtml = '';
+                if (servicio.imagenes && Array.isArray(servicio.imagenes)) {
+                    servicio.imagenes.forEach((img, i) => {
+                        accordionHtml += `<div class="accordion-panel ${i === 0 ? 'active' : ''}" style="background-image: url('${img}');" aria-label="${servicio.titulo} ${i+1}"></div>`;
+                    });
+                }
+
+                let incluyeHtml = '';
+                if (servicio.incluye && Array.isArray(servicio.incluye)) {
+                    servicio.incluye.forEach(item => {
+                        incluyeHtml += `<li><span class="check-icon">✓</span> ${item}</li>`;
+                    });
+                }
+
+                const row = document.createElement('div');
+                row.className = 'service-row';
+                row.innerHTML = `
+                    <div class="service-img-col image-accordion">
+                        ${accordionHtml}
+                    </div>
+                    <div class="service-text-col">
+                        <div class="gold-line"></div>
+                        <h2 class="section-title">${servicio.titulo}</h2>
+                        <p class="service-desc">${servicio.descripcion}</p>
+                        ${incluyeHtml ? `<h4 class="includes-title">Incluye:</h4>
+                        <ul class="check-list" style="margin-bottom: 1.5rem;">
+                            ${incluyeHtml}
+                        </ul>` : ''}
+                        <div class="service-meta">
+                            <p><strong>Duración:</strong> <span class="meta-value">${servicio.duracion}</span></p>
+                            <p><strong>Precio:</strong> <span class="meta-value">${servicio.precio}</span></p>
+                        </div>
+                        <a href="contacto.html#reservar" class="btn btn-primary mt-3 btn-open-booking" data-servicio-id="${servicio.id}">Reservar este Servicio</a>
+                    </div>
+                `;
+                servicesListDiv.appendChild(row);
+            });
+
+            serviciosContainer.appendChild(catSection);
         });
 
         // Re-bind accordion logic for dynamically added elements

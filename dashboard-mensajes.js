@@ -468,12 +468,25 @@ const CitasModule = {
 
     populateServiciosSelect() {
         const select = document.getElementById('cita-servicio');
+        if (!select) return;
         const current = select.value;
         select.innerHTML = '<option value="">— Seleccionar servicio —</option>';
         if (this.serviciosList) {
+            // Agrupar por categoría
+            const grouped = {};
             this.serviciosList.forEach(s => {
-                select.innerHTML += `<option value="${s.titulo}">${s.titulo}</option>`;
+                const cat = s.categoria || 'General';
+                if (!grouped[cat]) grouped[cat] = [];
+                grouped[cat].push(s);
             });
+            for (const catName in grouped) {
+                let optgroup = `<optgroup label="${catName}">`;
+                grouped[catName].forEach(s => {
+                    optgroup += `<option value="${s.titulo}">${s.titulo}</option>`;
+                });
+                optgroup += `</optgroup>`;
+                select.innerHTML += optgroup;
+            }
         }
         if (current) select.value = current;
     },

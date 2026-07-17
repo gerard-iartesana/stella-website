@@ -1,8 +1,26 @@
 {
+  "categorias": [
+    {
+      "id": "trenzas",
+      "nombre": "Trenzas",
+      "orden": 0
+    },
+    {
+      "id": "sistemas-capilares",
+      "nombre": "Sistemas Capilares",
+      "orden": 1
+    },
+    {
+      "id": "peinados",
+      "nombre": "Peinados",
+      "orden": 2
+    }
+  ],
   "servicios": [
     {
       "id": "trenzado",
       "titulo": "Trenzado",
+      "categoria": "Trenzas",
       "descripcion": "Arte ancestral africano que protege y embellece tu cabello. Cada trenza es una expresión de maestría artesanal que combina tradición y estilo contemporáneo.",
       "imagenes": [
         "./imagenes/Trenzas-3.jpg",
@@ -21,6 +39,7 @@
     {
       "id": "sistema-capilar",
       "titulo": "Sistema Capilar para Hombres",
+      "categoria": "Sistemas Capilares",
       "descripcion": "Soluciones discretas y personalizadas para recuperar la confianza. Sistemas capilares de máxima calidad que se adaptan perfectamente a tu estilo de vida.",
       "imagenes": [
         "./imagenes/capilar-1.png",
@@ -39,6 +58,7 @@
     {
       "id": "peinados-eventos",
       "titulo": "Peinados para Eventos",
+      "categoria": "Peinados",
       "descripcion": "Estilismo profesional para tus momentos especiales. Diseños elegantes que realzan tu belleza natural y te hacen brillar en cada ocasión.",
       "imagenes": [
         "./imagenes/eventos-1.png",

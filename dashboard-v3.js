@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- State ---
-    let appData = { servicios: [], lookbook: [] };
+    let appData = { servicios: [], lookbook: [], categorias: [] };
+    let activeCategoryName = 'Todas';
 
     // --- Init Supabase ---
     if (typeof initSupabase === 'function') initSupabase();
@@ -26,6 +27,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const confirmOkBtn = document.getElementById('confirm-ok-btn');
     const confirmCancelBtn = document.getElementById('confirm-cancel-btn');
     const confirmCancelX = document.getElementById('confirm-cancel-x');
+
+    // Custom Prompt Modal (for Categories)
+    const promptOverlay = document.getElementById('prompt-overlay');
+    const promptTitle = document.getElementById('prompt-title');
+    const promptInput = document.getElementById('prompt-input');
+    const promptOkBtn = document.getElementById('prompt-ok-btn');
+    const promptCancelBtn = document.getElementById('prompt-cancel-btn');
+    const promptCancelX = document.getElementById('prompt-cancel-x');
 
     // --- API URL ---
     const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
@@ -74,6 +83,30 @@ document.addEventListener('DOMContentLoaded', () => {
     confirmCancelX.addEventListener('click', hideConfirm);
     confirmOverlay.addEventListener('click', (e) => { if (e.target === confirmOverlay) hideConfirm(); });
 
+    // --- Custom Prompt ---
+    let pendingPromptCallback = null;
+    window.showPrompt = function(title, defaultValue, onConfirm) {
+        promptTitle.textContent = title;
+        promptInput.value = defaultValue || '';
+        pendingPromptCallback = onConfirm;
+        promptOverlay.classList.add('active');
+        setTimeout(() => promptInput.focus(), 100);
+    };
+    function hidePrompt() {
+        promptOverlay.classList.remove('active');
+        pendingPromptCallback = null;
+    }
+    promptOkBtn.addEventListener('click', () => {
+        const val = promptInput.value.trim();
+        if (val && pendingPromptCallback) {
+            pendingPromptCallback(val);
+            hidePrompt();
+        }
+    });
+    promptCancelBtn.addEventListener('click', hidePrompt);
+    promptCancelX.addEventListener('click', hidePrompt);
+    promptOverlay.addEventListener('click', (e) => { if (e.target === promptOverlay) hidePrompt(); });
+
     // --- Navigation ---
     navBtns.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -95,6 +128,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const { data: lData, error: lErr } = await supabaseClient.from('lookbook').select('*').order('orden', { ascending: true });
                 if (sErr) throw sErr;
 
+                let cData = [];
+                try {
+                    const { data, error } = await supabaseClient.from('categorias').select('*').order('orden', { ascending: true });
+                    if (!error) cData = data || [];
+                } catch (e) {
+                    console.warn('Categorias table fetch error, using fallback:', e);
+                }
+
                 // Si está vacío, migramos desde el local
                 if (sData.length === 0 && lData.length === 0) {
                     console.log('Supabase vacío. Migrando desde Vercel/Local...');
@@ -103,14 +144,33 @@ document.addEventListener('DOMContentLoaded', () => {
                         const localData = await res.json();
                         const sToInsert = (localData.servicios || []).map((s, i) => { const {id, ...rest} = s; return { ...rest, orden: i }; });
                         const lToInsert = (localData.lookbook || []).map((l, i) => { const {id, ...rest} = l; return { ...rest, orden: i }; });
+                        const cToInsert = (localData.categorias || []).map((c, i) => { const {id, ...rest} = c; return { ...rest, orden: i }; });
                         if (sToInsert.length > 0) await supabaseClient.from('servicios').insert(sToInsert);
                         if (lToInsert.length > 0) await supabaseClient.from('lookbook').insert(lToInsert);
+                        if (cToInsert.length > 0) {
+                            try {
+                                await supabaseClient.from('categorias').insert(cToInsert);
+                            } catch (errCat) {
+                                console.warn('Supabase categories insert failed:', errCat);
+                            }
+                        }
                         return fetchData(); // Re-fetch para obtener UUIDs
                     }
                 }
 
                 appData.servicios = sData || [];
                 appData.lookbook = lData || [];
+                appData.categorias = cData || [];
+
+                // Si no hay categorías, las generamos dinámicamente de los servicios existentes
+                if (appData.categorias.length === 0) {
+                    const uniqueNames = [...new Set(appData.servicios.map(s => s.categoria || 'General'))];
+                    appData.categorias = uniqueNames.map((name, i) => ({
+                        id: `cat-${Date.now()}-${i}`,
+                        nombre: name,
+                        orden: i
+                    }));
+                }
             } catch (err) {
                 console.error('Error Supabase fetch:', err);
                 await fetchLocalFallback();
@@ -119,6 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
             await fetchLocalFallback();
         }
         
+        renderCategorias();
         renderServicios();
         renderLookbook();
         populateLookbookServicesDropdown();
@@ -128,7 +189,19 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchLocalFallback() {
         try {
             const res = await fetch(API_URL);
-            if (res.ok) appData = await res.json();
+            if (res.ok) {
+                appData = await res.json();
+                if (!appData.categorias) appData.categorias = [];
+                // Si no hay categorías, las generamos dinámicamente de los servicios existentes
+                if (appData.categorias.length === 0) {
+                    const uniqueNames = [...new Set((appData.servicios || []).map(s => s.categoria || 'General'))];
+                    appData.categorias = uniqueNames.map((name, i) => ({
+                        id: `cat-${Date.now()}-${i}`,
+                        nombre: name,
+                        orden: i
+                    }));
+                }
+            }
         } catch (e) {
             console.error('Error fetch local:', e);
         }
@@ -143,12 +216,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Wipe and replace strategy (since arrays are small and Citas stores servicio as TEXT)
                 await supabaseClient.from('servicios').delete().neq('titulo', '000'); // Hack para borrar todos
                 await supabaseClient.from('lookbook').delete().neq('categoria', '000'); 
+                try {
+                    await supabaseClient.from('categorias').delete().neq('nombre', '000');
+                } catch (errDelCat) {
+                    console.warn('Wiping categories from Supabase failed, probably no table:', errDelCat);
+                }
 
                 const sToInsert = appData.servicios.map((s, i) => { const {id, created_at, updated_at, ...rest} = s; return { ...rest, orden: i }; });
                 const lToInsert = appData.lookbook.map((l, i) => { const {id, created_at, ...rest} = l; return { ...rest, orden: i }; });
+                const cToInsert = appData.categorias.map((c, i) => { const {id, created_at, ...rest} = c; return { ...rest, orden: i }; });
 
                 if (sToInsert.length > 0) await supabaseClient.from('servicios').insert(sToInsert);
                 if (lToInsert.length > 0) await supabaseClient.from('lookbook').insert(lToInsert);
+                if (cToInsert.length > 0) {
+                    try {
+                        await supabaseClient.from('categorias').insert(cToInsert);
+                    } catch (errInsCat) {
+                        console.warn('Inserting categories in Supabase failed:', errInsCat);
+                    }
+                }
 
                 // Fetch new IDs
                 await fetchData();
@@ -207,20 +293,178 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (editBtn) { editServicio(editBtn.dataset.index); }
     });
 
+    function populateServiciosCategorySelect() {
+        const select = document.getElementById('servicio-categoria');
+        if (!select) return;
+        select.innerHTML = '';
+        appData.categorias.forEach(cat => {
+            select.innerHTML += `<option value="${cat.nombre}">${cat.nombre}</option>`;
+        });
+    }
+
+    function renderCategorias() {
+        const categoriesList = document.getElementById('categories-list');
+        if (!categoriesList) return;
+        categoriesList.innerHTML = '';
+
+        // Botón "Todas"
+        const countAll = appData.servicios.length;
+        const allLi = document.createElement('li');
+        allLi.className = `category-item ${activeCategoryName === 'Todas' ? 'active' : ''}`;
+        allLi.innerHTML = `
+            <div class="category-info">
+                <span class="category-name">Todas las categorías</span>
+            </div>
+            <span class="category-badge">${countAll}</span>
+        `;
+        allLi.addEventListener('click', () => {
+            activeCategoryName = 'Todas';
+            renderCategorias();
+            renderServicios();
+        });
+        categoriesList.appendChild(allLi);
+
+        // Renderizar cada categoría
+        appData.categorias.forEach((cat, index) => {
+            const countSvc = appData.servicios.filter(s => s.categoria === cat.nombre).length;
+            const li = document.createElement('li');
+            li.className = `category-item ${activeCategoryName === cat.nombre ? 'active' : ''}`;
+            li.innerHTML = `
+                <div class="category-info">
+                    <span class="category-name">${cat.nombre}</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span class="category-badge">${countSvc}</span>
+                    <div class="category-actions">
+                        <button class="category-action-btn edit-cat" data-index="${index}" title="Editar nombre">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        </button>
+                        <button class="category-action-btn delete-cat" data-index="${index}" title="Eliminar categoría">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #dc3545;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        </button>
+                    </div>
+                </div>
+            `;
+            li.addEventListener('click', (e) => {
+                if (e.target.closest('.category-action-btn')) return; // No cambiar de vista si clicamos en acciones
+                activeCategoryName = cat.nombre;
+                renderCategorias();
+                renderServicios();
+            });
+            categoriesList.appendChild(li);
+        });
+
+        // Eventos de editar y borrar categorías
+        categoriesList.querySelectorAll('.edit-cat').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const index = parseInt(btn.dataset.index);
+                const cat = appData.categorias[index];
+                showPrompt('Editar Categoría', cat.nombre, (newName) => {
+                    if (newName && newName !== cat.nombre) {
+                        // Comprobar si ya existe una con ese nombre
+                        if (appData.categorias.some(c => c.nombre.toLowerCase() === newName.toLowerCase())) {
+                            alert('Ya existe una categoría con ese nombre.');
+                            return;
+                        }
+                        const oldName = cat.nombre;
+                        cat.nombre = newName;
+                        // Actualizar servicios que tenían la categoría antigua
+                        appData.servicios.forEach(s => {
+                            if (s.categoria === oldName) s.categoria = newName;
+                        });
+                        if (activeCategoryName === oldName) activeCategoryName = newName;
+                        renderCategorias();
+                        renderServicios();
+                        saveData();
+                    }
+                });
+            });
+        });
+
+        categoriesList.querySelectorAll('.delete-cat').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const index = parseInt(btn.dataset.index);
+                const cat = appData.categorias[index];
+                showConfirm(`¿Estás seguro de eliminar la categoría "${cat.nombre}"? Esto también eliminará todos los servicios que pertenecen a ella.`, () => {
+                    const deletedName = cat.nombre;
+                    // Eliminar servicios
+                    appData.servicios = appData.servicios.filter(s => s.categoria !== deletedName);
+                    // Eliminar categoría
+                    appData.categorias.splice(index, 1);
+                    if (activeCategoryName === deletedName) {
+                        activeCategoryName = 'Todas';
+                    }
+                    renderCategorias();
+                    renderServicios();
+                    saveData();
+                });
+            });
+        });
+    }
+
+    // Evento Añadir Categoría
+    const addCategoriaBtn = document.getElementById('add-categoria-btn');
+    if (addCategoriaBtn) {
+        addCategoriaBtn.addEventListener('click', () => {
+            showPrompt('Nueva Categoría', '', (name) => {
+                if (name) {
+                    // Comprobar si ya existe
+                    if (appData.categorias.some(c => c.nombre.toLowerCase() === name.toLowerCase())) {
+                        alert('Ya existe una categoría con ese nombre.');
+                        return;
+                    }
+                    appData.categorias.push({
+                        id: `cat-${Date.now()}`,
+                        nombre: name,
+                        orden: appData.categorias.length
+                    });
+                    activeCategoryName = name; // Seleccionar la nueva categoría
+                    renderCategorias();
+                    renderServicios();
+                    saveData();
+                }
+            });
+        });
+    }
+
     function renderServicios() {
         serviciosList.innerHTML = '';
-        appData.servicios.forEach((servicio, index) => {
+        
+        const activeTitle = document.getElementById('active-category-title');
+        if (activeTitle) {
+            activeTitle.textContent = activeCategoryName === 'Todas' ? 'Todos los servicios' : activeCategoryName;
+        }
+
+        // Filtrar servicios
+        const filteredServices = activeCategoryName === 'Todas'
+            ? appData.servicios
+            : appData.servicios.filter(s => s.categoria === activeCategoryName);
+
+        if (filteredServices.length === 0) {
+            serviciosList.innerHTML = '<p class="text-center" style="color: var(--text-muted); padding: 2rem; width: 100%;">No hay servicios en esta categoría.</p>';
+            return;
+        }
+
+        filteredServices.forEach((servicio) => {
+            // Encontrar el índice original en appData.servicios
+            const originalIndex = appData.servicios.findIndex(s => s.id === servicio.id);
+            
             const card = document.createElement('div');
             card.className = 'item-card';
             card.innerHTML = `
                 <div class="item-info">
                     <h3>${servicio.titulo}</h3>
-                    <p>${servicio.precio} | ${servicio.duracion}</p>
-                    <p><em>${servicio.descripcion.substring(0, 80)}...</em></p>
+                    <p style="margin-bottom: 0.25rem;">
+                        <span class="category-badge" style="background: rgba(212,175,55,0.1); color: var(--gold); border-color: rgba(212,175,55,0.3); margin-right: 0.5rem; font-size: 0.7rem;">${servicio.categoria || 'General'}</span>
+                        <strong>${servicio.precio}</strong> | ${servicio.duracion}
+                    </p>
+                    <p><em>${(servicio.descripcion || '').substring(0, 80)}...</em></p>
                 </div>
                 <div class="item-actions">
-                    <button class="btn btn-secondary btn-small edit-servicio" data-index="${index}">Editar</button>
-                    <button class="btn btn-danger btn-small delete-servicio" data-index="${index}">Eliminar</button>
+                    <button class="btn btn-secondary btn-small edit-servicio" data-index="${originalIndex}">Editar</button>
+                    <button class="btn btn-danger btn-small delete-servicio" data-index="${originalIndex}">Eliminar</button>
                 </div>`;
             serviciosList.appendChild(card);
         });
@@ -229,6 +473,10 @@ document.addEventListener('DOMContentLoaded', () => {
     addServicioBtn.addEventListener('click', () => {
         servicioForm.reset();
         document.getElementById('servicio-id').value = '';
+        populateServiciosCategorySelect();
+        if (activeCategoryName !== 'Todas') {
+            document.getElementById('servicio-categoria').value = activeCategoryName;
+        }
         document.getElementById('servicio-modal-title').textContent = 'Añadir Servicio';
         if (typeof UploadModule !== 'undefined') UploadModule.clearZone('servicio-upload-zone', 'servicio-previews');
         openModal('servicio-modal');
@@ -238,6 +486,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const s = appData.servicios[index];
         document.getElementById('servicio-id').value = index;
         document.getElementById('servicio-titulo').value = s.titulo;
+        populateServiciosCategorySelect();
+        document.getElementById('servicio-categoria').value = s.categoria || 'General';
         document.getElementById('servicio-descripcion').value = s.descripcion;
         document.getElementById('servicio-duracion').value = s.duracion;
         document.getElementById('servicio-precio').value = s.precio;
@@ -255,6 +505,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const newServicio = {
             id: document.getElementById('servicio-titulo').value.toLowerCase().replace(/\s+/g, '-'),
             titulo: document.getElementById('servicio-titulo').value,
+            categoria: document.getElementById('servicio-categoria').value,
             descripcion: document.getElementById('servicio-descripcion').value,
             duracion: document.getElementById('servicio-duracion').value,
             precio: document.getElementById('servicio-precio').value,
@@ -266,6 +517,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         if (id === '') { appData.servicios.push(newServicio); }
         else { newServicio.id = appData.servicios[id].id; appData.servicios[id] = newServicio; }
+        renderCategorias();
         renderServicios();
         closeModal();
         saveData();

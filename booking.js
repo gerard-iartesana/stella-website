@@ -181,7 +181,6 @@ const BookingModule = {
     },
 
     // ─── STEP 1: SERVICES ───────────────────────────
-
     renderServices() {
         const container = document.getElementById('booking-services-list');
         if (!container) return;
@@ -191,28 +190,46 @@ const BookingModule = {
             return;
         }
 
-        container.innerHTML = this.services.map(s => {
-            const dur = s.duracion_minutos || this.parseDuration(s.duracion);
-            const durText = dur >= 60 ? `${Math.floor(dur/60)}h${dur%60 > 0 ? ` ${dur%60}min` : ''}` : `${dur} min`;
-            const img = s.imagenes && s.imagenes.length > 0 ? s.imagenes[0] : '';
-            return `<div class="booking-service-card" data-id="${s.id}">
-                ${img ? `<div class="booking-service-img"><img src="${img}" alt="${s.titulo}"></div>` : ''}
-                <div class="booking-service-info">
-                    <h4>${s.titulo}</h4>
-                    <div class="booking-service-meta">
-                        <span class="booking-meta-item">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                            ${durText}
-                        </span>
-                        <span class="booking-meta-item">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                            ${s.precio || 'Consultar'}
-                        </span>
+        // Agrupar dinámicamente por categoría
+        const grouped = {};
+        this.services.forEach(s => {
+            const cat = s.categoria || 'General';
+            if (!grouped[cat]) grouped[cat] = [];
+            grouped[cat].push(s);
+        });
+
+        let html = '';
+        for (const catName in grouped) {
+            const catServices = grouped[catName];
+            if (catServices.length === 0) continue;
+
+            html += `<h3 class="booking-category-title" style="font-family: var(--font-heading); font-size: 1rem; color: var(--gold, #D4AF37); margin: 1.5rem 0 0.75rem 0; padding-bottom: 0.25rem; border-bottom: 1px solid rgba(255,255,255,0.05); text-transform: uppercase; letter-spacing: 0.5px;">${catName}</h3>`;
+
+            html += catServices.map(s => {
+                const dur = s.duracion_minutos || this.parseDuration(s.duracion);
+                const durText = dur >= 60 ? `${Math.floor(dur/60)}h${dur%60 > 0 ? ` ${dur%60}min` : ''}` : `${dur} min`;
+                const img = s.imagenes && s.imagenes.length > 0 ? s.imagenes[0] : '';
+                return `<div class="booking-service-card" data-id="${s.id}">
+                    ${img ? `<div class="booking-service-img"><img src="${img}" alt="${s.titulo}"></div>` : ''}
+                    <div class="booking-service-info">
+                        <h4>${s.titulo}</h4>
+                        <div class="booking-service-meta">
+                            <span class="booking-meta-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                ${durText}
+                            </span>
+                            <span class="booking-meta-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                                ${s.precio || 'Consultar'}
+                            </span>
+                        </div>
                     </div>
-                </div>
-                <span class="booking-service-arrow">→</span>
-            </div>`;
-        }).join('');
+                    <span class="booking-service-arrow">→</span>
+                </div>`;
+            }).join('');
+        }
+
+        container.innerHTML = html;
 
         container.querySelectorAll('.booking-service-card').forEach(card => {
             card.addEventListener('click', () => {
