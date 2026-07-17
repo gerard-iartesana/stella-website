@@ -223,36 +223,48 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof supabase !== 'undefined' && supabaseClient) {
             try {
                 // Wipe and replace strategy (since arrays are small and Citas stores servicio as TEXT)
-                await supabaseClient.from('servicios').delete().neq('titulo', '000'); // Hack para borrar todos
-                await supabaseClient.from('lookbook').delete().neq('categoria', '000'); 
-                try {
-                    await supabaseClient.from('categorias').delete().neq('nombre', '000');
-                } catch (errDelCat) {
-                    console.warn('Wiping categories from Supabase failed, probably no table:', errDelCat);
+                const { error: errDelS } = await supabaseClient.from('servicios').delete().neq('titulo', '000'); // Hack para borrar todos
+                if (errDelS) { console.error('Delete servicios error:', errDelS); throw new Error(errDelS.message); }
+
+                const { error: errDelL } = await supabaseClient.from('lookbook').delete().neq('categoria', '000'); 
+                if (errDelL) { console.error('Delete lookbook error:', errDelL); throw new Error(errDelL.message); }
+
+                if (hasCategoriasTable) {
+                    const { error: errDelC } = await supabaseClient.from('categorias').delete().neq('nombre', '000');
+                    if (errDelC) { console.error('Delete categorias error:', errDelC); throw new Error(errDelC.message); }
                 }
 
                 const sToInsert = appData.servicios.map((s, i) => { const {id, created_at, updated_at, ...rest} = s; return { ...rest, orden: i }; });
                 const lToInsert = appData.lookbook.map((l, i) => { const {id, created_at, ...rest} = l; return { ...rest, orden: i }; });
                 const cToInsert = appData.categorias.map((c, i) => { const {id, created_at, ...rest} = c; return { ...rest, orden: i }; });
 
-                if (sToInsert.length > 0) await supabaseClient.from('servicios').insert(sToInsert);
-                if (lToInsert.length > 0) await supabaseClient.from('lookbook').insert(lToInsert);
-                if (cToInsert.length > 0) {
-                    try {
-                        await supabaseClient.from('categorias').insert(cToInsert);
-                    } catch (errInsCat) {
-                        console.warn('Inserting categories in Supabase failed:', errInsCat);
-                    }
+                if (sToInsert.length > 0) {
+                    const { error: errInsS } = await supabaseClient.from('servicios').insert(sToInsert);
+                    if (errInsS) { console.error('Insert servicios error:', errInsS); throw new Error(errInsS.message); }
+                }
+
+                if (lToInsert.length > 0) {
+                    const { error: errInsL } = await supabaseClient.from('lookbook').insert(lToInsert);
+                    if (errInsL) { console.error('Insert lookbook error:', errInsL); throw new Error(errInsL.message); }
+                }
+
+                if (hasCategoriasTable && cToInsert.length > 0) {
+                    const { error: errInsC } = await supabaseClient.from('categorias').insert(cToInsert);
+                    if (errInsC) { console.error('Insert categorias error:', errInsC); throw new Error(errInsC.message); }
                 }
 
                 // Fetch new IDs
                 await fetchData();
                 saveStatus.textContent = '✓ Guardado (Supabase)';
-                saveStatus.classList.add('status-success');
+                saveStatus.className = 'status-msg status-success';
                 setTimeout(() => { saveStatus.textContent = ''; }, 3000);
                 return;
             } catch (err) {
                 console.error('Error guardando en Supabase:', err);
+                saveStatus.textContent = 'Error al guardar (Supabase)';
+                saveStatus.className = 'status-msg status-error';
+                alert('⚠️ Error al guardar en la base de datos de Supabase:\n\n' + err.message);
+                return;
             }
         }
 
