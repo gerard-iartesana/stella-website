@@ -320,76 +320,81 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
-    function renderServicios(servicios) {
+    function renderCategoryFilters(servicios) {
+        const filterBar = document.getElementById('categories-filter-bar');
+        if (!filterBar) return;
+        
+        const uniqueCategories = ['Todas', ...new Set(servicios.map(s => s.categoria || 'General'))];
+        
+        filterBar.innerHTML = uniqueCategories.map(cat => {
+            return `<button class="category-filter-btn ${cat === 'Todas' ? 'active' : ''}" data-category="${cat}">${cat}</button>`;
+        }).join('');
+        
+        filterBar.querySelectorAll('.category-filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBar.querySelectorAll('.category-filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const selectedCat = btn.dataset.category;
+                
+                const filtered = selectedCat === 'Todas'
+                    ? servicios
+                    : servicios.filter(s => (s.categoria || 'General') === selectedCat);
+                    
+                renderFilteredServicios(filtered);
+            });
+        });
+    }
+
+    function renderFilteredServicios(servicios) {
+        if (!serviciosContainer) return;
         serviciosContainer.innerHTML = '';
         
-        // Agrupar dinámicamente por categoría
-        const uniqueCategories = [...new Set(servicios.map(s => s.categoria || 'General'))];
-        
-        uniqueCategories.forEach(catName => {
-            const catServicios = servicios.filter(s => (s.categoria || 'General') === catName);
-            if (catServicios.length === 0) return;
+        if (servicios.length === 0) {
+            serviciosContainer.innerHTML = '<p class="text-center" style="color: var(--color-black); opacity: 0.6; padding: 3rem; width: 100%;">No hay servicios en esta categoría.</p>';
+            return;
+        }
 
-            // Crear sección de la categoría
-            const catSection = document.createElement('div');
-            catSection.className = 'category-section';
-            catSection.style.marginBottom = '4rem';
-            catSection.innerHTML = `
-                <div class="category-header text-center" style="margin-bottom: 3rem; margin-top: 2rem;">
-                    <div class="gold-line center"></div>
-                    <h2 class="category-title" style="font-family: var(--font-heading); font-size: 2.2rem; font-weight: 500; color: var(--color-black); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">${catName}</h2>
+        servicios.forEach(servicio => {
+            let accordionHtml = '';
+            if (servicio.imagenes && Array.isArray(servicio.imagenes)) {
+                servicio.imagenes.forEach((img, i) => {
+                    accordionHtml += `<div class="accordion-panel ${i === 0 ? 'active' : ''}" style="background-image: url('${img}');" aria-label="${servicio.titulo} ${i+1}"></div>`;
+                });
+            }
+
+            let incluyeHtml = '';
+            if (servicio.incluye && Array.isArray(servicio.incluye)) {
+                servicio.incluye.forEach(item => {
+                    incluyeHtml += `<li><span class="check-icon">✓</span> ${item}</li>`;
+                });
+            }
+
+            const row = document.createElement('div');
+            row.className = 'service-row';
+            row.innerHTML = `
+                <div class="service-img-col image-accordion">
+                    ${accordionHtml}
                 </div>
-                <div class="category-services-list">
-                    <!-- Servicios se inyectan aquí -->
+                <div class="service-text-col">
+                    <div class="gold-line"></div>
+                    <h2 class="section-title">${servicio.titulo}</h2>
+                    <p class="service-desc">${servicio.descripcion}</p>
+                    ${incluyeHtml ? `<h4 class="includes-title">Incluye:</h4>
+                    <ul class="check-list" style="margin-bottom: 1.5rem;">
+                        ${incluyeHtml}
+                    </ul>` : ''}
+                    <div class="service-meta">
+                        <p><strong>Duración:</strong> <span class="meta-value">${servicio.duracion}</span></p>
+                        <p><strong>Precio:</strong> <span class="meta-value">${servicio.precio}</span></p>
+                    </div>
+                    <a href="contacto.html#reservar" class="btn btn-primary mt-3 btn-open-booking" data-servicio-id="${servicio.id}">Reservar este Servicio</a>
                 </div>
             `;
-
-            const servicesListDiv = catSection.querySelector('.category-services-list');
-
-            catServicios.forEach(servicio => {
-                let accordionHtml = '';
-                if (servicio.imagenes && Array.isArray(servicio.imagenes)) {
-                    servicio.imagenes.forEach((img, i) => {
-                        accordionHtml += `<div class="accordion-panel ${i === 0 ? 'active' : ''}" style="background-image: url('${img}');" aria-label="${servicio.titulo} ${i+1}"></div>`;
-                    });
-                }
-
-                let incluyeHtml = '';
-                if (servicio.incluye && Array.isArray(servicio.incluye)) {
-                    servicio.incluye.forEach(item => {
-                        incluyeHtml += `<li><span class="check-icon">✓</span> ${item}</li>`;
-                    });
-                }
-
-                const row = document.createElement('div');
-                row.className = 'service-row';
-                row.innerHTML = `
-                    <div class="service-img-col image-accordion">
-                        ${accordionHtml}
-                    </div>
-                    <div class="service-text-col">
-                        <div class="gold-line"></div>
-                        <h2 class="section-title">${servicio.titulo}</h2>
-                        <p class="service-desc">${servicio.descripcion}</p>
-                        ${incluyeHtml ? `<h4 class="includes-title">Incluye:</h4>
-                        <ul class="check-list" style="margin-bottom: 1.5rem;">
-                            ${incluyeHtml}
-                        </ul>` : ''}
-                        <div class="service-meta">
-                            <p><strong>Duración:</strong> <span class="meta-value">${servicio.duracion}</span></p>
-                            <p><strong>Precio:</strong> <span class="meta-value">${servicio.precio}</span></p>
-                        </div>
-                        <a href="contacto.html#reservar" class="btn btn-primary mt-3 btn-open-booking" data-servicio-id="${servicio.id}">Reservar este Servicio</a>
-                    </div>
-                `;
-                servicesListDiv.appendChild(row);
-            });
-
-            serviciosContainer.appendChild(catSection);
+            serviciosContainer.appendChild(row);
         });
 
         // Re-bind accordion logic for dynamically added elements
-        const accordionPanels = document.querySelectorAll('.accordion-panel');
+        const accordionPanels = serviciosContainer.querySelectorAll('.accordion-panel');
         accordionPanels.forEach(panel => {
             panel.addEventListener('click', () => {
                 const container = panel.closest('.image-accordion');
@@ -398,6 +403,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 panel.classList.add('active');
             });
         });
+    }
+
+    function renderServicios(servicios) {
+        renderCategoryFilters(servicios);
+        renderFilteredServicios(servicios);
     }
 
     function renderLookbook(lookbook) {

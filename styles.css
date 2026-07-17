@@ -2285,3 +2285,53 @@ img {
         height: 50px;
     }
 }
+
+/* Category Filter Bar for services page */
+.categories-filter-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 3.5rem;
+    padding: 0.5rem 0;
+}
+
+.category-filter-btn {
+    background: none;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    color: var(--color-black);
+    padding: 0.7rem 1.8rem;
+    font-size: 0.85rem;
+    font-family: var(--font-heading);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.category-filter-btn:hover {
+    border-color: var(--color-gold);
+    color: var(--color-gold);
+    transform: translateY(-1px);
+}
+
+.category-filter-btn.active {
+    background: var(--color-black);
+    border-color: var(--color-black);
+    color: var(--color-gold);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+@media (max-width: 768px) {
+    .categories-filter-container {
+        gap: 0.5rem;
+        margin-bottom: 2.5rem;
+    }
+    .category-filter-btn {
+        padding: 0.5rem 1.2rem;
+        font-size: 0.75rem;
+    }
+}
