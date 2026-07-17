@@ -19,24 +19,6 @@
       "precio": "Desde 50€"
     },
     {
-      "id": "pelucas-oncologicas",
-      "titulo": "Pelucas Oncológicas",
-      "descripcion": "Adaptaciones naturales diseñadas con sensibilidad y experiencia para quienes atraviesan un tratamiento oncológico. Tu bienestar y confianza son nuestra prioridad.",
-      "imagenes": [
-        "./imagenes/pelucas-1.png",
-        "./imagenes/pelucas-2.png",
-        "./imagenes/pelucas-3.png"
-      ],
-      "incluye": [
-        "Consulta privada y confidencial",
-        "Pelucas de aspecto natural y cómodo",
-        "Ajustes personalizados a tu medida",
-        "Acompañamiento con empatía durante todo el proceso"
-      ],
-      "duracion": "90-120 min.",
-      "precio": "Desde 70€"
-    },
-    {
       "id": "sistema-capilar",
       "titulo": "Sistema Capilar para Hombres",
       "descripcion": "Soluciones discretas y personalizadas para recuperar la confianza. Sistemas capilares de máxima calidad que se adaptan perfectamente a tu estilo de vida.",
@@ -82,13 +64,6 @@
       "servicio_id": "Trenzado"
     },
     {
-      "id": "item2",
-      "categoria": "pelucas",
-      "imagen": "./imagenes/pelucas-1.png",
-      "alt": "Peluca oncológica premium",
-      "servicio_id": "Pelucas Oncológicas"
-    },
-    {
       "id": "item3",
       "categoria": "especiales",
       "imagen": "./imagenes/eventos-1.png",
@@ -117,13 +92,6 @@
       "servicio_id": "Sistema Capilar para Hombres"
     },
     {
-      "id": "item7",
-      "categoria": "pelucas",
-      "imagen": "./imagenes/pelucas-2.png",
-      "alt": "Peluca oncológica premium",
-      "servicio_id": "Pelucas Oncológicas"
-    },
-    {
       "id": "item8",
       "categoria": "trenzas",
       "imagen": "./imagenes/Trenzas-3.jpg",
@@ -150,13 +118,6 @@
       "imagen": "./imagenes/capilar-3.png",
       "alt": "Sistema capilar hombre 3",
       "servicio_id": "Sistema Capilar para Hombres"
-    },
-    {
-      "id": "item12",
-      "categoria": "pelucas",
-      "imagen": "./imagenes/pelucas-3.png",
-      "alt": "Peluca oncológica",
-      "servicio_id": "Pelucas Oncológicas"
     },
     {
       "id": "item13",
