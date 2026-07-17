@@ -196,7 +196,9 @@ const BookingModule = {
             filterBar = document.createElement('div');
             filterBar.id = 'booking-categories-filter';
             filterBar.className = 'categories-filter-container';
-            filterBar.style.marginBottom = '1.5rem';
+            filterBar.style.marginBottom = '1rem';
+            filterBar.style.gap = '0.5rem';
+            filterBar.style.padding = '0';
             filterBar.style.justifyContent = 'center';
             container.parentNode.insertBefore(filterBar, container);
         }
@@ -209,7 +211,7 @@ const BookingModule = {
         // Renderizar los botones de filtro
         const uniqueCategories = ['Todas', ...new Set(this.services.map(s => s.categoria || 'General'))];
         filterBar.innerHTML = uniqueCategories.map(cat => {
-            return `<button class="category-filter-btn ${cat === this.activeCategory ? 'active' : ''}" data-category="${cat}" style="padding: 0.5rem 1.2rem; font-size: 0.75rem;">${cat}</button>`;
+            return `<button class="category-filter-btn ${cat === this.activeCategory ? 'active' : ''}" data-category="${cat}" style="padding: 0.4rem 1rem; font-size: 0.72rem; letter-spacing: 0.5px; border-radius: 30px;">${cat}</button>`;
         }).join('');
 
         // Añadir eventos a los botones
@@ -231,28 +233,8 @@ const BookingModule = {
             return;
         }
 
-        let html = '';
-        if (this.activeCategory === 'Todas') {
-            const grouped = {};
-            filteredServices.forEach(s => {
-                const cat = s.categoria || 'General';
-                if (!grouped[cat]) grouped[cat] = [];
-                grouped[cat].push(s);
-            });
-
-            for (const catName in grouped) {
-                const catServices = grouped[catName];
-                if (catServices.length === 0) continue;
-
-                html += `<h3 class="booking-category-title" style="font-family: var(--font-heading); font-size: 1rem; color: var(--gold, #D4AF37); margin: 1.5rem 0 0.75rem 0; padding-bottom: 0.25rem; border-bottom: 1px solid rgba(255,255,255,0.05); text-transform: uppercase; letter-spacing: 0.5px;">${catName}</h3>`;
-
-                html += catServices.map(s => this.renderServiceCardHtml(s)).join('');
-            }
-        } else {
-            // Listar directamente sin cabecera de categoría
-            html = filteredServices.map(s => this.renderServiceCardHtml(s)).join('');
-        }
-
+        // Listar todos los servicios directamente sin cabeceras de categorías
+        const html = filteredServices.map(s => this.renderServiceCardHtml(s)).join('');
         container.innerHTML = html;
 
         // Añadir eventos de clic a las tarjetas
