@@ -190,53 +190,101 @@ const BookingModule = {
             return;
         }
 
-        // Agrupar dinámicamente por categoría
-        const grouped = {};
-        this.services.forEach(s => {
-            const cat = s.categoria || 'General';
-            if (!grouped[cat]) grouped[cat] = [];
-            grouped[cat].push(s);
+        // 1. Asegurar contenedor de filtros
+        let filterBar = document.getElementById('booking-categories-filter');
+        if (!filterBar) {
+            filterBar = document.createElement('div');
+            filterBar.id = 'booking-categories-filter';
+            filterBar.className = 'categories-filter-container';
+            filterBar.style.marginBottom = '1.5rem';
+            filterBar.style.justifyContent = 'center';
+            container.parentNode.insertBefore(filterBar, container);
+        }
+
+        // Inicializar categoría activa si no está definida
+        if (!this.activeCategory) {
+            this.activeCategory = 'Todas';
+        }
+
+        // Renderizar los botones de filtro
+        const uniqueCategories = ['Todas', ...new Set(this.services.map(s => s.categoria || 'General'))];
+        filterBar.innerHTML = uniqueCategories.map(cat => {
+            return `<button class="category-filter-btn ${cat === this.activeCategory ? 'active' : ''}" data-category="${cat}" style="padding: 0.5rem 1.2rem; font-size: 0.75rem;">${cat}</button>`;
+        }).join('');
+
+        // Añadir eventos a los botones
+        filterBar.querySelectorAll('.category-filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.activeCategory = btn.dataset.category;
+                this.renderServices(); // Re-renderizar
+            });
         });
 
+        // 2. Filtrar servicios
+        const filteredServices = this.activeCategory === 'Todas'
+            ? this.services
+            : this.services.filter(s => (s.categoria || 'General') === this.activeCategory);
+
+        // 3. Renderizar listado de servicios
+        if (filteredServices.length === 0) {
+            container.innerHTML = '<p style="text-align:center;color:#999;padding:2rem;">No hay servicios en esta categoría.</p>';
+            return;
+        }
+
         let html = '';
-        for (const catName in grouped) {
-            const catServices = grouped[catName];
-            if (catServices.length === 0) continue;
+        if (this.activeCategory === 'Todas') {
+            const grouped = {};
+            filteredServices.forEach(s => {
+                const cat = s.categoria || 'General';
+                if (!grouped[cat]) grouped[cat] = [];
+                grouped[cat].push(s);
+            });
 
-            html += `<h3 class="booking-category-title" style="font-family: var(--font-heading); font-size: 1rem; color: var(--gold, #D4AF37); margin: 1.5rem 0 0.75rem 0; padding-bottom: 0.25rem; border-bottom: 1px solid rgba(255,255,255,0.05); text-transform: uppercase; letter-spacing: 0.5px;">${catName}</h3>`;
+            for (const catName in grouped) {
+                const catServices = grouped[catName];
+                if (catServices.length === 0) continue;
 
-            html += catServices.map(s => {
-                const dur = s.duracion_minutos || this.parseDuration(s.duracion);
-                const durText = dur >= 60 ? `${Math.floor(dur/60)}h${dur%60 > 0 ? ` ${dur%60}min` : ''}` : `${dur} min`;
-                const img = s.imagenes && s.imagenes.length > 0 ? s.imagenes[0] : '';
-                return `<div class="booking-service-card" data-id="${s.id}">
-                    ${img ? `<div class="booking-service-img"><img src="${img}" alt="${s.titulo}"></div>` : ''}
-                    <div class="booking-service-info">
-                        <h4>${s.titulo}</h4>
-                        <div class="booking-service-meta">
-                            <span class="booking-meta-item">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                                ${durText}
-                            </span>
-                            <span class="booking-meta-item">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                                ${s.precio || 'Consultar'}
-                            </span>
-                        </div>
-                    </div>
-                    <span class="booking-service-arrow">→</span>
-                </div>`;
-            }).join('');
+                html += `<h3 class="booking-category-title" style="font-family: var(--font-heading); font-size: 1rem; color: var(--gold, #D4AF37); margin: 1.5rem 0 0.75rem 0; padding-bottom: 0.25rem; border-bottom: 1px solid rgba(255,255,255,0.05); text-transform: uppercase; letter-spacing: 0.5px;">${catName}</h3>`;
+
+                html += catServices.map(s => this.renderServiceCardHtml(s)).join('');
+            }
+        } else {
+            // Listar directamente sin cabecera de categoría
+            html = filteredServices.map(s => this.renderServiceCardHtml(s)).join('');
         }
 
         container.innerHTML = html;
 
+        // Añadir eventos de clic a las tarjetas
         container.querySelectorAll('.booking-service-card').forEach(card => {
             card.addEventListener('click', () => {
                 const svc = this.services.find(s => String(s.id) === String(card.dataset.id));
                 if (svc) this.selectService(svc);
             });
         });
+    },
+
+    renderServiceCardHtml(s) {
+        const dur = s.duracion_minutos || this.parseDuration(s.duracion);
+        const durText = dur >= 60 ? `${Math.floor(dur/60)}h${dur%60 > 0 ? ` ${dur%60}min` : ''}` : `${dur} min`;
+        const img = s.imagenes && s.imagenes.length > 0 ? s.imagenes[0] : '';
+        return `<div class="booking-service-card" data-id="${s.id}">
+            ${img ? `<div class="booking-service-img"><img src="${img}" alt="${s.titulo}"></div>` : ''}
+            <div class="booking-service-info">
+                <h4>${s.titulo}</h4>
+                <div class="booking-service-meta">
+                    <span class="booking-meta-item">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        ${durText}
+                    </span>
+                    <span class="booking-meta-item">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                        ${s.precio || 'Consultar'}
+                    </span>
+                </div>
+            </div>
+            <span class="booking-service-arrow">→</span>
+        </div>`;
     },
 
     selectService(svc) {
